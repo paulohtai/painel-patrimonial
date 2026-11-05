@@ -309,7 +309,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 
 <footer class="wrap foot">
   <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
-  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.0</span></p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.1</span></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -396,7 +396,7 @@ const IOF = [96,93,90,86,83,80,76,73,70,66,63,60,56,53,50,46,43,40,36,33,30,26,2
 const DEF_PERFIL = {
   v:2, corrigir:true, reservaValor:30000, reservaMensal:500, reservaAtual:"poupbb", resHoriz:12, resCen:"focus", protPct:30, protProd:"tselic", titFiltro:"regra", titTipo:"todos", titValor:10000, custoMensal:null, mesesMeta:6,
   comp:{inicial:30000,mensal:500,meses:24,cen:"focus",filtro:"todos",real:false,modo:"comparar",foco:null,ordem:"rendimento"},
-  meta:{alvo:100000,inicial:30000,mensal:500,produto:"bv",cen:"focus"},
+  meta:{alvo:100000,inicial:30000,mensal:500,cen:"focus",real:false,ordem:"tempo",filtro:"todos",prazo:120},
   renda:{patrimonio:100000,produto:"ipca40"},
   posicoes:[],
   overrides:{}, mkOverrides:{}
@@ -933,44 +933,97 @@ function pintarComparador(){
 }
 
 
+const PRAZOS_META = [36,60,120,180,240];
+function calcMetas(){
+  const g = perfil.meta, sc = g.cen||"focus", real = !!g.real, alvo = Math.max(g.alvo||1,1);
+  const lista = P.filter(p => (g.filtro||"todos")==="todos" || (g.filtro==="diaria" ? ["diaria","imediata","d1"].includes(p.liq) : ["mercado","venc"].includes(p.liq)));
+  const atingiu = (x,m) => (real ? x.liq/deflator(m,sc) : x.liq) >= alvo;
+  const res = lista.map(p=>{
+    const s = simular(p, g.inicial, g.mensal, 600, sc);
+    const m = s.findIndex((x,i)=>atingiu(x,i));
+    return {p, s, m: m>=0 ? m : null, fim: m>=0 ? s[m] : null};
+  });
+  const ordem = g.ordem||"tempo";
+  res.sort((a,b)=> ordem==="protecao" ? (prot(b.p).nivel-prot(a.p).nivel) || ((a.m??9999)-(b.m??9999)) : ((a.m??9999)-(b.m??9999)) || (prot(b.p).nivel-prot(a.p).nivel));
+  const prazo = g.prazo||120;
+  // aporte mensal necessário para chegar no prazo escolhido, por produto
+  res.forEach(x=>{
+    const ok = v => { const f=simular(x.p,g.inicial,v,prazo,sc)[prazo]; return (real ? f.liq/deflator(prazo,sc) : f.liq) >= alvo; };
+    if (ok(0)) { x.precisa = 0; return; }
+    let lo=0, hi=alvo; for (let i=0;i<32;i++){ const mid=(lo+hi)/2; if (ok(mid)) hi=mid; else lo=mid; }
+    x.precisa = hi;
+  });
+  return {g, sc, real, alvo, res, prazo};
+}
+
+let _metasCache=null;
+function dataLonga(m){ const d=new Date(D0.getTime()); d.setDate(1); d.setMonth(d.getMonth()+m); return d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"}); }
 function metas(){
-  const g = perfil.meta, p = byId(g.produto)||byId("bv");
-  let mesAt = null; const s = simular(p,g.inicial,g.mensal,600,g.cen);
-  for (const x of s) if (x.liq>=g.alvo){ mesAt=x.m; break; }
-  const prazos = [36,60,120];
-  const precisa = prazos.map(n=>{ let lo=0,hi=g.alvo; for(let i=0;i<40;i++){ const mid=(lo+hi)/2; const r=simular(p,g.inicial,mid,n,g.cen)[n].liq; if(r>=g.alvo) hi=mid; else lo=mid; } return {n,v:hi}; });
-  const chegada = mesAt!=null ? new Date(D0.getTime()+mesAt*30.4375*864e5) : null;
-  const fim = mesAt!=null ? s[mesAt] : null;
+  const calc = _metasCache = calcMetas(); const {g, sc, real, alvo, res, prazo} = calc;
+  const ok = res.filter(x=>x.m!=null);
+  const best = ok[0] || null;
+  const poup = res.find(x=>x.p.id==="poupbb");
+  const atual = res.find(x=>x.p.id===perfil.reservaAtual);
+  const ref = atual || poup;
+  const chegada = m => dataMes(m);
   return `<section class="view">
-  <div><div class="eyebrow">Metas</div><h2 class="title">Quando você chega lá</h2>
-  <p class="lede">Escolha o alvo e o produto. O cálculo mostra a data provável e quanto aportar por mês para chegar antes. ${perfil.corrigir!==false?"Os aportes sobem com a inflação a cada 12 meses (altere no Comparador).":"Aportes fixos, sem correção pela inflação."}</p></div>
-  <div class="card">
+  <div><div class="eyebrow">Metas</div><h2 class="title">Quando você chega lá, em cada produto</h2>
+  <p class="lede">Defina a meta e quanto consegue guardar. O painel calcula, para todos os produtos, quando a meta é atingida e quanto seria preciso aportar para chegar no prazo que você escolher. ${perfil.corrigir!==false?"Os aportes sobem com a inflação a cada 12 meses.":"Aportes fixos, sem correção pela inflação."}</p></div>
+
+  <div class="card stack">
     <div class="row">
-      <div class="field"><label for="gAlvo">Meta</label><div class="input"><span>R$</span><input id="gAlvo" type="number" min="1000" step="5000" value="${g.alvo}"></div></div>
-      <div class="field"><label for="gIni">Já tenho</label><div class="input"><span>R$</span><input id="gIni" type="number" min="0" step="500" value="${g.inicial}"></div></div>
-      <div class="field"><label for="gMen">Aporte mensal</label><div class="input"><span>R$</span><input id="gMen" type="number" min="0" step="100" value="${g.mensal}"></div></div>
-      <div class="field" style="flex:2 1 220px"><label for="gProd">Produto</label><div class="input"><select id="gProd">${P.map(x=>`<option value="${x.id}" ${x.id===p.id?"selected":""}>${esc(x.inst==="Tesouro Direto"?x.nome:x.inst+" · "+x.nome)} · ${taxaTxt(x)}</option>`).join("")}</select></div></div>
+      <div class="field"><label for="gAlvo">Meta</label><div class="input"><span>R$</span><input id="gAlvo" type="number" min="1000" step="5000" value="${g.alvo}" inputmode="decimal"></div></div>
+      <div class="field"><label for="gIni">Já tenho</label><div class="input"><span>R$</span><input id="gIni" type="number" min="0" step="500" value="${g.inicial}" inputmode="decimal"></div></div>
+      <div class="field"><label for="gMen">Aporte mensal</label><div class="input"><span>R$</span><input id="gMen" type="number" min="0" step="100" value="${g.mensal}" inputmode="decimal"></div></div>
     </div>
-    <div class="field" style="margin-top:12px"><label>Cenário de juros</label><div class="seg" id="gCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===g.cen}">${v.nome}</button>`).join("")}</div></div>
+    <div class="switches">
+      <label class="switch"><input type="checkbox" id="gReal" ${real?"checked":""}><span class="sw-ui" aria-hidden="true"></span><span><b>Meta em dinheiro de hoje</b><span class="tiny">${brl(alvo)} com o poder de compra de hoje. Com a inflação, o valor nominal exigido cresce com o tempo</span></span></label>
+      <label class="switch"><input type="checkbox" id="gCorr" ${perfil.corrigir!==false?"checked":""}><span class="sw-ui" aria-hidden="true"></span><span><b>Corrigir aportes pela inflação</b><span class="tiny">O aporte sobe ${pct(ipcaCen(sc),1)} a cada 12 meses</span></span></label>
+    </div>
+    <div class="row">
+      <div class="field" style="flex:2 1 300px"><label>Cenário de juros</label><div class="seg" id="gCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===sc}">${v.nome}</button>`).join("")}</div></div>
+      <div class="field" style="flex:1 1 220px"><label>Ordenar por</label><div class="seg" id="gOrd">${[["tempo","Mais rápido"],["protecao","Proteção"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${(g.ordem||"tempo")===k}">${v}</button>`).join("")}</div></div>
+      <div class="field" style="flex:1 1 240px"><label>Liquidez</label><div class="seg" id="gFil">${[["todos","Todos"],["diaria","Diária"],["longo","Longo prazo"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${(g.filtro||"todos")===k}">${v}</button>`).join("")}</div></div>
+    </div>
   </div>
-  <div class="grid2">
-    <div class="card stack">
-      ${mesAt!=null?`<div class="eyebrow">Chegada prevista</div>
-      <div style="font-family:var(--f-display);font-weight:800;font-size:clamp(28px,6vw,40px);letter-spacing:-.02em">${chegada.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</div>
-      <div class="kpis">
-        <div class="kpi"><span>Tempo</span><b>${Math.floor(mesAt/12)}a ${mesAt%12}m</b></div>
-        <div class="kpi"><span>Você aporta</span><b>${brl(fim.inv)}</b></div>
-        <div class="kpi"><span>Os juros dão</span><b style="color:var(--good)">${brl(fim.liq-fim.inv)}</b></div>
-        <div class="kpi"><span>Parte dos juros</span><b>${pct((fim.liq-fim.inv)/fim.liq*100,0)}</b></div>
-      </div>
-      <div class="chartbox" style="height:240px"><canvas id="gChart" aria-label="Gráfico da meta"></canvas></div>`
-      :`<p class="muted">Com esses valores a meta não é atingida em 50 anos. Aumente o aporte mensal.</p>`}
+
+  ${best?`<div class="hero">
+    <div>
+      <div class="eyebrow">Mais rápido · ${esc(rotulo(best.p))}</div>
+      <div class="big">${dataLonga(best.m)}</div>
+      <p>Em <b>${duracaoTxt(best.m)}</b> você chega a ${brl(alvo)}${real?" em dinheiro de hoje":""}. ${ref&&ref.m!=null&&ref.p.id!==best.p.id?`Na ${esc(rotulo(ref.p))} levaria <b>${duracaoTxt(ref.m)}</b>, ${duracaoTxt(ref.m-best.m)} a mais.`:ref&&ref.m==null?`Na ${esc(rotulo(ref.p))} a meta não é atingida em 50 anos.`:""}</p>
     </div>
-    <div class="card stack">
-      <h3>Aporte necessário por prazo</h3>
-      ${precisa.map(x=>`<div class="row" style="justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px"><span>Em ${x.n/12} anos</span><b class="num">${x.v<1?"já chega":brl(x.v)+"/mês"}</b></div>`).join("")}
-      <p class="tiny" style="margin:0">Na fase inicial o tamanho do aporte pesa mais que a taxa. Depois de alguns anos, os juros passam a fazer a maior parte do trabalho.</p>
+    <div class="side">
+      <div class="kv"><span>Você aporta</span><b class="num">${brl(best.fim.inv)}</b></div>
+      <div class="kv"><span>Os juros dão</span><b class="num up">${brl(best.fim.liq-best.fim.inv)}</b></div>
+      <div class="kv"><span>Valor na data</span><b class="num">${brl(best.fim.liq)}</b></div>
+      <div class="kv"><span>Parte dos juros</span><b class="num up">${pct((best.fim.liq-best.fim.inv)/best.fim.liq*100,0)}</b></div>
     </div>
+  </div>`:`<div class="card"><p class="muted" style="margin:0">Com esses valores nenhum produto chega à meta em 50 anos. Aumente o aporte mensal ou reduza a meta.</p></div>`}
+
+  <div class="card stack">
+    <div class="chart-head"><div><h3>Tempo até a meta</h3><div class="tiny">Cada barra é um produto. Quanto mais curta, mais cedo você chega. A cor indica a proteção. O eixo começa perto do mais rápido para destacar as diferenças.</div></div></div>
+    <div class="chartbox" id="gBox" style="height:${Math.max(ok.length*30+60,160)}px"><canvas id="gChart" aria-label="Tempo até a meta por produto"></canvas></div>
+    <div class="protlegend">${[5,4,3,2,1].map(n=>`<div>${escudo(n)}</div>`).join("")}</div>
+  </div>
+
+  <div class="card stack">
+    <div class="chart-head">
+      <div><h3>Comparação completa</h3><div class="tiny">Aporte necessário por mês para chegar em ${duracaoTxt(prazo)}${perfil.corrigir!==false?" (valor do primeiro ano, depois corrigido pela inflação)":""}</div></div>
+      <div class="presets" id="gPrazo">${PRAZOS_META.map(m=>`<button type="button" data-v="${m}" aria-pressed="${m===prazo}">${m/12} anos</button>`).join("")}</div>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Produto</th><th>Proteção</th><th>Taxa</th><th>Chega em</th><th class="r">Tempo</th><th class="r">Você aporta</th><th class="r">Juros</th><th class="r">Aporte para ${prazo/12} anos</th></tr></thead>
+      <tbody>${res.map((x,i)=>`<tr class="${best&&x.p.id===best.p.id?"hl":""}"><td class="num">${i+1}</td>
+        <td><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${ref&&x.p.id===ref.p.id?' <span class="chip accent">atual</span>':""}</td>
+        <td>${protChip(x.p)}</td><td>${taxaTxt(x.p)}</td>
+        <td>${x.m!=null?chegada(x.m):"não chega em 50 anos"}</td>
+        <td class="r num">${x.m!=null?(x.m/12).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" anos":"—"}</td>
+        <td class="r num">${x.fim?brl(x.fim.inv):"—"}</td>
+        <td class="r num">${x.fim?brl(x.fim.liq-x.fim.inv):"—"}</td>
+        <td class="r num"><b>${x.precisa<1?"já chega":brl(x.precisa)+"/mês"}</b></td></tr>`).join("")}</tbody>
+    </table></div>
+    <p class="tiny" style="margin:0">Prefixados e IPCA+ considerados até o vencimento; depois disso o dinheiro passa a render o CDI. Produtos com teto (PicPay, PagBank, Mercado Pago) rendem a taxa promocional só até o limite.</p>
   </div>
 </section>`;
 }
@@ -1242,11 +1295,13 @@ function bind(r){
   }
   if (r==="metas"){
     const g=perfil.meta;
-    on("gAlvo","input",e=>{g.alvo=num(e.target.value)||1;softRender();});
+    on("gAlvo","input",e=>{g.alvo=Math.max(num(e.target.value),1);softRender();});
     on("gIni","input",e=>{g.inicial=num(e.target.value);softRender();});
     on("gMen","input",e=>{g.mensal=num(e.target.value);softRender();});
-    on("gProd","change",e=>{g.produto=e.target.value;render();salvar();});
-    document.querySelectorAll("#gCen button").forEach(b=>b.addEventListener("click",()=>{g.cen=b.dataset.v;render();salvar();}));
+    on("gReal","change",e=>{g.real=e.target.checked;render();salvar();});
+    on("gCorr","change",e=>{perfil.corrigir=e.target.checked;render();salvar();});
+    [["gCen","cen"],["gOrd","ordem"],["gFil","filtro"]].forEach(([id,k])=>document.querySelectorAll("#"+id+" button").forEach(b=>b.addEventListener("click",()=>{g[k]=b.dataset.v;render();salvar();})));
+    document.querySelectorAll("#gPrazo button").forEach(b=>b.addEventListener("click",()=>{g.prazo=+b.dataset.v;render();salvar();}));
     desenharMeta();
   }
   if (r==="renda"){
@@ -1367,13 +1422,21 @@ function desenharReserva(){
 function desenharMeta(){
   if (!window.Chart) return;
   const el=document.getElementById("gChart"); if(!el) return;
-  const g=perfil.meta,p=byId(g.produto); const s=simular(p,g.inicial,g.mensal,600,g.cen);
-  let fim=s.findIndex(x=>x.liq>=g.alvo); if(fim<0) return;
-  const step=Math.max(1,Math.round(fim/40)); const idx=[]; for(let m=0;m<=fim;m+=step) idx.push(m); if(idx[idx.length-1]!==fim) idx.push(fim);
+  const {res} = _metasCache || calcMetas(); const ok=res.filter(x=>x.m!=null);
+  const corN = n => cssv(n>=4?"--good":n===3?"--accent":"--warn");
   const o=baseOpts();
-  charts.g=new Chart(el,{type:"line",data:{labels:idx,datasets:[
-    {label:"Patrimônio líquido",data:idx.map(m=>s[m].liq),borderColor:cssv("--accent"),backgroundColor:cssv("--accent-soft"),fill:true,borderWidth:2.5,pointRadius:0,tension:.2},
-    {label:"Total aportado",data:idx.map(m=>s[m].inv),borderColor:cssv("--ink-3"),borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:o});
+  o.indexAxis="y"; o.interaction={mode:"nearest",axis:"y",intersect:false};
+  o.animation={duration:reduzMov()?0:500,easing:"easeOutCubic"};
+  o.scales={
+    x:{min:Math.max(0,Math.floor((Math.min(...ok.map(x=>x.m))-6)/12)*12),grid:{color:cssv("--line")},border:{display:false},ticks:{color:cssv("--ink-2"),stepSize:12,callback:v=>v%12===0?(v/12)+" anos":""}},
+    y:{grid:{display:false},border:{color:cssv("--line")},ticks:{color:cssv("--ink"),font:{weight:"600"},autoSkip:false}}
+  };
+  o.plugins.tooltip.callbacks={title:it=>ok[it[0].dataIndex] ? rotulo(ok[it[0].dataIndex].p) : "", label:it=>{ const x=ok[it.dataIndex]; return " "+duracaoTxt(x.m)+" · chega em "+dataMes(x.m); }};
+  o.plugins.valores={on:true};
+  const plugValores={id:"valores",afterDatasetsDraw(ch){ const g=ch.ctx, meta=ch.getDatasetMeta(0); g.save(); g.font="600 11.5px 'IBM Plex Mono', monospace"; g.fillStyle=cssv("--ink-2"); g.textBaseline="middle";
+    meta.data.forEach((b,i)=>{ const x=ok[i]; if(!x) return; g.fillText(dataMes(x.m), b.x+6, b.y); }); g.restore(); }};
+  o.layout={padding:{right:70}};
+  charts.g=new Chart(el,{type:"bar",data:{labels:ok.map(x=>rotulo(x.p)),datasets:[{data:ok.map(x=>x.m),backgroundColor:ok.map(x=>corN(prot(x.p).nivel)),borderRadius:6,barThickness:18}]},options:o,plugins:[plugValores]});
 }
 
 /* ===================== INÍCIO ===================== */
