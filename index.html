@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Painel Patrimonial</title>
+<meta name="description" content="Painel pessoal de renda fixa: reserva de emergência, comparador de CDBs e Tesouro Direto com taxas atualizadas automaticamente.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1E19">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Patrimônio">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: app de bolso. Cabeçalho fixo com status dos dados, abas roláveis, uma coluna no celular e grade de duas colunas a partir de 900px. */
+:root{
+  --bg:#EEF3F1; --surface:#FFFFFF; --surface-2:#E6EEEB; --line:#D3DEDA;
+  --ink:#0E1E19; --ink-2:#4B5D57; --ink-3:#7A8B85;
+  --accent:#0A6B5C; --accent-ink:#FFFFFF; --accent-soft:#D8EEE8;
+  --gold:#A86A12; --gold-soft:#F6EBD6;
+  --good:#17804A; --good-soft:#DDF2E5; --warn:#A86A12; --warn-soft:#F6EBD6; --crit:#B93B12; --crit-soft:#F9E1D7;
+  --c1:#0A6B5C; --c2:#C27C13; --c3:#3A5FCD; --c4:#B4386B; --c5:#5E8C1F; --c6:#7A4FB8; --c7:#6B7A75;
+  --shadow:0 1px 2px rgba(14,30,25,.06),0 6px 18px rgba(14,30,25,.06);
+  --hero-bg:#0E1E19; --hero-fg:#EEF3F1; --hero-accent:#5FD8BB;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Figtree",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#09120F; --surface:#111D19; --surface-2:#172620; --line:#22362E;
+  --ink:#E2ECE8; --ink-2:#9AAEA7; --ink-3:#6E837B;
+  --accent:#3DC2A5; --accent-ink:#03211A; --accent-soft:#12372F;
+  --gold:#E4AB4B; --gold-soft:#3A2B11;
+  --good:#4CC782; --good-soft:#123422; --warn:#E4AB4B; --warn-soft:#3A2B11; --crit:#F2805A; --crit-soft:#3D1D12;
+  --c1:#3DC2A5; --c2:#E4AB4B; --c3:#7D9BF0; --c4:#EE7BA8; --c5:#A3D45A; --c6:#B898F0; --c7:#8DA09A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+  --hero-bg:#123128; --hero-fg:#E2ECE8; --hero-accent:#6FE3C6;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#09120F; --surface:#111D19; --surface-2:#172620; --line:#22362E;
+  --ink:#E2ECE8; --ink-2:#9AAEA7; --ink-3:#6E837B;
+  --accent:#3DC2A5; --accent-ink:#03211A; --accent-soft:#12372F;
+  --gold:#E4AB4B; --gold-soft:#3A2B11;
+  --good:#4CC782; --good-soft:#123422; --warn:#E4AB4B; --warn-soft:#3A2B11; --crit:#F2805A; --crit-soft:#3D1D12;
+  --c1:#3DC2A5; --c2:#E4AB4B; --c3:#7D9BF0; --c4:#EE7BA8; --c5:#A3D45A; --c6:#B898F0; --c7:#8DA09A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+  --hero-bg:#123128; --hero-fg:#E2ECE8; --hero-accent:#6FE3C6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Cabeçalho */
+header.app{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:12px;padding-block:12px}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;flex:none}
+.mark svg{width:20px;height:20px}
+.brand{min-width:0;flex:1}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:19px;letter-spacing:-.02em;line-height:1.1}
+.brand p{margin:0;font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:99px;background:var(--ink-3);flex:none}
+.dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.crit{background:var(--crit)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;text-decoration:none;color:var(--ink-2);font-weight:600;font-size:14px;padding:8px 13px;border-radius:999px}
+nav.tabs a:hover{background:var(--surface-2);color:var(--ink)}
+nav.tabs a[aria-current="page"]{background:var(--ink);color:var(--surface)}
+
+main{padding-block:20px 56px}
+section.view{display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+h2.title{margin:2px 0 0;font-family:var(--f-display);font-weight:800;font-size:clamp(24px,5vw,34px);letter-spacing:-.025em;line-height:1.08;text-wrap:balance}
+h3{margin:0;font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:-.01em}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:62ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);min-width:0}
+.card.flat{box-shadow:none}
+.grid2{display:grid;gap:18px;grid-template-columns:1fr}
+@media (min-width:900px){.grid2{grid-template-columns:1.15fr .85fr}}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.muted{color:var(--ink-2)} .small{font-size:13px} .tiny{font-size:12px;color:var(--ink-3)}
+
+/* Hero */
+.hero{background:var(--hero-bg);color:var(--hero-fg);border-radius:18px;padding:22px;display:grid;gap:18px;grid-template-columns:1fr}
+@media (min-width:760px){.hero{grid-template-columns:1.3fr 1fr;align-items:end}}
+.hero .eyebrow{color:color-mix(in srgb,var(--hero-fg) 62%,transparent)}
+.hero .big{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,8vw,52px);letter-spacing:-.03em;line-height:1}
+.hero p{margin:8px 0 0;color:color-mix(in srgb,var(--hero-fg) 78%,transparent);max-width:52ch}
+.hero .cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:var(--hero-accent);color:#04221C;font-weight:700;padding:10px 16px;border-radius:999px;text-decoration:none}
+.hero .side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hero .kv{background:color-mix(in srgb,var(--hero-fg) 8%,transparent);border:1px solid color-mix(in srgb,var(--hero-fg) 14%,transparent);border-radius:12px;padding:12px}
+.hero .kv span{display:block;font-size:12px;color:color-mix(in srgb,var(--hero-fg) 65%,transparent)}
+.hero .kv b{font-family:var(--f-num);font-size:18px;font-weight:600}
+.hero .kv b.up{color:var(--hero-accent)}
+
+/* Indicadores */
+.tiles{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:700px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1000px){.tiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.tile .k{font-size:12px;color:var(--ink-2);font-weight:600}
+.tile .v{font-family:var(--f-num);font-size:22px;font-weight:600;margin-top:2px}
+.tile .s{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* Notas do analista */
+.notes{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.notes li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.tag.juros{background:var(--accent-soft);color:var(--accent)}
+.tag.risco{background:var(--crit-soft);color:var(--crit)}
+.tag.acao{background:var(--gold-soft);color:var(--gold)}
+.tag.agenda{background:var(--surface-2);color:var(--ink-2)}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.chip.good{background:var(--good-soft);color:var(--good)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+.chip.neutral{background:var(--surface-2);color:var(--ink-2)}
+.chip.accent{background:var(--accent-soft);color:var(--accent)}
+
+/* Formulários */
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 150px}
+.field label{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.02em}
+.input{display:flex;align-items:center;background:var(--surface-2);border:1.5px solid transparent;border-radius:10px;padding:0 10px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+.input span{color:var(--ink-3);font-size:13px;white-space:nowrap}
+.input input,.input select{flex:1;min-width:0;border:0;background:transparent;outline:none;padding:10px 4px;font-family:var(--f-num);font-size:15px}
+.input select{font-family:var(--f-body);font-weight:600;padding-right:0}
+.seg{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;border:0;background:transparent;padding:8px 10px;border-radius:8px;font-weight:600;font-size:13px;color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.btn{border:0;cursor:pointer;font-weight:700;border-radius:10px;padding:10px 14px;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.link{background:transparent;color:var(--accent);padding:6px 4px}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* Ranking de produtos */
+.rank{display:flex;flex-direction:column;gap:8px}
+.ritem{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.ritem.top{border-color:var(--accent);background:color-mix(in srgb,var(--accent-soft) 45%,var(--surface))}
+.ritem.cur{border-style:dashed}
+.ritem .pos{font-family:var(--f-num);font-weight:600;color:var(--ink-3);text-align:center}
+.ritem .nm{font-weight:700;line-height:1.25}
+.ritem .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;align-items:center}
+.ritem .val{text-align:right}
+.ritem .val b{display:block;font-family:var(--f-num);font-weight:600;font-size:16px}
+.ritem .val small{font-size:12px;color:var(--ink-3)}
+.delta.up{color:var(--good)} .delta.down{color:var(--crit)}
+
+/* Tabela */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:680px}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);text-align:left;font-weight:700;padding:10px 12px;background:var(--surface-2);position:sticky;top:0}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+td.num{white-space:nowrap}
+tr.hl td{background:color-mix(in srgb,var(--accent-soft) 50%,transparent)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+
+.chartbox{position:relative;height:300px}
+@media (min-width:700px){.chartbox{height:360px}}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.legend button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink-2)}
+.legend button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink-3)}
+.legend i{width:9px;height:9px;border-radius:99px;display:inline-block}
+
+.progress{height:12px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.progress > div{height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.kpi{background:var(--surface-2);border-radius:12px;padding:12px}
+.kpi span{display:block;font-size:12px;color:var(--ink-2);font-weight:600}
+.kpi b{font-family:var(--f-num);font-weight:600;font-size:19px}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.callout{border-left:3px solid var(--gold);background:var(--gold-soft);padding:12px 14px;border-radius:0 10px 10px 0;font-size:13.5px}
+.callout.info{border-color:var(--accent);background:var(--accent-soft)}
+
+/* Carteira */
+.pos-list{display:flex;flex-direction:column;gap:10px}
+.pos-card{border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px}
+.pos-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.pos-grid div span{display:block;font-size:11.5px;color:var(--ink-3);font-weight:600}
+.pos-grid div b{font-family:var(--f-num);font-weight:600}
+
+/* Analista */
+.ask{display:flex;gap:8px;flex-wrap:wrap}
+.ask .input{flex:1 1 220px}
+.ask .input input{font-family:var(--f-body)}
+.answer{white-space:pre-wrap;font-size:14px;line-height:1.6;background:var(--surface-2);border-radius:12px;padding:14px;max-width:72ch}
+.sugs{display:flex;flex-wrap:wrap;gap:6px}
+.sugs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+
+footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top:1px solid var(--line)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+[hidden]{display:none!important}
+.iconbtn{border:0;background:var(--surface-2);color:var(--ink-2);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none}
+.iconbtn svg{width:18px;height:18px}
+.install{display:flex;gap:12px;align-items:flex-start}
+.install b{display:block}
+.foot a{color:var(--ink-2)}
+@media (max-width:420px){.status #statusTxt{display:none}.status{padding:8px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<script>try{var t=localStorage.getItem("pp-tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<header class="app">
+  <div class="wrap">
+    <div class="bar">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 18 L9 12 L13 15 L20 6" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="6" r="2" fill="var(--accent-ink)"/></svg>
+      </div>
+      <div class="brand">
+        <h1>Painel Patrimonial</h1>
+        <p>Renda fixa com garantia FGC e Tesouro Nacional</p>
+      </div>
+      <span class="status" id="status" title="Situação dos dados de mercado"><span class="dot" id="statusDot"></span><span id="statusTxt">Dados de 05/11</span></span>
+      <button class="iconbtn" id="temaBtn" type="button" aria-label="Alternar tema claro e escuro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+    <nav class="tabs" aria-label="Seções">
+      <a href="#painel">Painel</a>
+      <a href="#reserva">Reserva</a>
+      <a href="#comparar">Comparador</a>
+      <a href="#metas">Metas</a>
+      <a href="#renda">Renda passiva</a>
+      <a href="#carteira">Carteira</a>
+      <a href="#taxas">Taxas e fontes</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<footer class="wrap foot">
+  <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v1.0</span></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+"use strict";
+/* ===================== DADOS DE MERCADO (05/11/2026) ===================== */
+const HOJE = new Date();
+const SNAP = {
+  atualizadoEm: "2026-11-05T14:30:00-03:00",
+  fonte: "Copom 04/11, Tesouro Direto 03/11, Focus 03/11",
+  selic: 13.75, cdi: 13.65, ipca12m: 4.57, ipcaRef: "set/26", focusIpca: 5.22, focusSelic: 13.50, focusAno: 2026, tr: 0.15,
+  proxCopom: "09/12", ata: "10/11", notasRef: "novembro de 2026",
+  notas: [
+    {t:"juros", x:"Copom manteve a Selic em 13,75% em 04/11, por unanimidade, e interrompeu a sequência de cinco cortes iniciada em março."},
+    {t:"risco", x:"Após o segundo turno, a preocupação com as contas públicas abriu as taxas do Tesouro: prefixados acima de 15% e IPCA+ 2032 perto de 8% de juro real."},
+    {t:"juros", x:"Focus projeta inflação de 5,22% em 2026 e Selic de 13,50% no fim do ano. Parte dos economistas espera nova manutenção em dezembro."},
+    {t:"acao", x:"Reserva de emergência: pós-fixado com liquidez diária. Juros parados por mais tempo favorecem quem está no CDI."},
+    {t:"acao", x:"Dinheiro de longo prazo: as taxas atuais do Tesouro são historicamente altas. Entrada gradual, só com dinheiro que pode esperar o vencimento."},
+    {t:"agenda", x:"Ata do Copom em 10/11. Próxima reunião em 08 e 09/12."}
+  ]
+};
+const D0 = new Date("2026-11-05T12:00:00-03:00");
+const P = [
+  {id:"bv",nome:"CDB Liquidez Diária",inst:"Banco BV",tipo:"cdi",taxa:110,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:1,cond:"Exige conta digital BV (gratuita)",fonte:"iDinheiro",data:"2026-10-01"},
+  {id:"bmg",nome:"Super Poup (CDB)",inst:"Banco BMG",tipo:"cdi",taxa:107,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:50,cond:"Exige conta BMG",fonte:"iDinheiro",data:"2026-10-01"},
+  {id:"sofisa",nome:"CDB Liquidez Diária",inst:"Sofisa Direto",tipo:"cdi",taxa:105,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:1,cond:"Sem valor máximo",fonte:"iDinheiro",data:"2026-10-01"},
+  {id:"daycoval",nome:"CDB Liquidez Diária",inst:"Daycoval",tipo:"cdi",taxa:104,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:1000,cond:"Mínimo de R$ 1.000",fonte:"InfinitePay",data:"2026-07-31"},
+  {id:"c6",nome:"CDB Liquidez Diária",inst:"C6 Bank",tipo:"cdi",taxa:102,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:20,cond:"",fonte:"InfinitePay",data:"2026-07-31"},
+  {id:"nubank",nome:"Caixinha",inst:"Nubank",tipo:"cdi",taxa:100,liq:"imediata",liqTxt:"Resgate imediato, 24h",gar:"FGC",ir:"reg",min:1,cond:"",fonte:"InfinitePay",data:"2026-07-31"},
+  {id:"inter",nome:"CDB Liquidez Diária",inst:"Inter",tipo:"cdi",taxa:100,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:1,cond:"",fonte:"InfinitePay",data:"2026-07-31"},
+  {id:"itau",nome:"CDB Liquidez Diária",inst:"Itaú",tipo:"cdi",taxa:100,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:1,cond:"",fonte:"iDinheiro",data:"2026-10-01"},
+  {id:"mp",nome:"Cofrinho",inst:"Mercado Pago",tipo:"cdi",taxa:100,liq:"imediata",liqTxt:"Resgate imediato",gar:"Títulos públicos",ir:"reg",min:1,cond:"Sem FGC; lastro em títulos públicos",fonte:"Investilize",data:"2026-08-10"},
+  {id:"bb",nome:"CDB Liquidez Diária",inst:"Banco do Brasil",tipo:"cdi",taxa:97,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:500,cond:"Mínimo de R$ 500",fonte:"InfinitePay",data:"2026-07-31"},
+  {id:"tselic",nome:"Tesouro Selic 2031",inst:"Tesouro Direto",tipo:"selic",taxa:0.07,liq:"d1",liqTxt:"Resgate em 1 dia útil",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,isencao:10000,cond:"Custódia de 0,20% a.a. acima de R$ 10 mil",fonte:"estimativa",data:"2026-11-03"},
+  {id:"poup",nome:"Poupança",inst:"Qualquer banco",tipo:"poup",taxa:0,liq:"diaria",liqTxt:"Rende só no aniversário",gar:"FGC",ir:"isento",min:1,cond:"Isenta de IR",fonte:"regra oficial",data:"2026-11-05"},
+  {id:"dm",nome:"CDB pós 2031",inst:"DM Financeira (via Genial)",tipo:"cdi",taxa:121,liq:"venc",liqTxt:"Só no vencimento",gar:"FGC",ir:"reg",min:1000,venc:"2031-11-04",cond:"Sem resgate antes de 04/11/2031",fonte:"Meelion",data:"2026-11-05"},
+  {id:"pre29",nome:"Tesouro Prefixado 2029",inst:"Tesouro Direto",tipo:"pre",taxa:15.19,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2029-01-01",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
+  {id:"pre32",nome:"Tesouro Prefixado 2032",inst:"Tesouro Direto",tipo:"pre",taxa:15.63,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-01-01",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
+  {id:"ipca32",nome:"Tesouro IPCA+ 2032",inst:"Tesouro Direto",tipo:"ipca",taxa:8.03,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-08-15",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
+  {id:"ipca40",nome:"Tesouro IPCA+ 2040",inst:"Tesouro Direto",tipo:"ipca",taxa:7.54,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2040-08-15",cond:"Oscila antes do vencimento",fonte:"InfoMoney",data:"2026-10-29"}
+];
+const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6","--c7"];
+const SCEN = {
+  estavel:{nome:"Juros estáveis",desc:"Selic parada no nível atual",pts:[[0,13.75]],ipca:4.6},
+  focus:{nome:"Projeção do mercado",desc:"Cortes graduais até cerca de 10,5% em 2028",pts:[[0,13.75],[1,13.5],[13,12.0],[25,10.5],[37,10.0]],ipca:4.6},
+  estresse:{nome:"Estresse fiscal",desc:"Selic sobe para 15% e cede só em 2029",pts:[[0,13.75],[1,13.75],[8,15.0],[25,15.0],[37,13.0],[49,12.0]],ipca:6.0}
+};
+const IOF = [96,93,90,86,83,80,76,73,70,66,63,60,56,53,50,46,43,40,36,33,30,26,23,20,16,13,10,6,3,0];
+
+/* ===================== ESTADO ===================== */
+const DEF_PERFIL = {
+  reservaValor:30000, reservaAtual:"bb", custoMensal:null, mesesMeta:6,
+  comp:{inicial:30000,mensal:0,meses:24,cen:"focus",filtro:"todos"},
+  meta:{alvo:100000,inicial:30000,mensal:500,produto:"bv",cen:"focus"},
+  renda:{patrimonio:100000,produto:"ipca40"},
+  posicoes:[],
+  overrides:{}, mkOverrides:{}
+};
+let perfil = clone(DEF_PERFIL);
+let mktRemote = null;           // data/mercado.json, gerado pela atualização automática
+let mktErro = false, saveTimer = null;
+let charts = {};
+
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function M(){ // mercado efetivo: embutido < remoto < ajustes do usuário
+  const base = Object.assign({}, SNAP);
+  if (mktRemote) for (const k of ["atualizadoEm","fonte","selic","cdi","ipca12m","ipcaRef","focusIpca","focusSelic","focusAno","tr","proxCopom","ata","notas","notasRef"]) if (mktRemote[k]!=null) base[k]=mktRemote[k];
+  for (const [k,v] of Object.entries(perfil.mkOverrides||{})) if (v!=null && v!=="") base[k]=v;
+  return base;
+}
+function prodInfo(p){ // taxa, fonte e data efetivas
+  const r = mktRemote && mktRemote.produtos && mktRemote.produtos[p.id];
+  const ov = perfil.overrides && perfil.overrides[p.id];
+  if (ov!=null && ov!=="") return {taxa:+ov, fonte:"ajuste seu", data:null, manual:true};
+  if (r && r.taxa!=null) return {taxa:+r.taxa, fonte:r.fonte||p.fonte, data:r.data||p.data};
+  return {taxa:p.taxa, fonte:p.fonte, data:p.data};
+}
+const rate = p => prodInfo(p).taxa;
+const byId = id => P.find(p=>p.id===id);
+const rotulo = p => (p.inst==="Tesouro Direto"||p.id==="poup") ? p.nome : p.inst;
+
+/* ===================== FORMATAÇÃO ===================== */
+const brl = (v,d=0) => (isFinite(v)?v:0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (v,d=2) => (isFinite(v)?v:0).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})+"%";
+const fmtN = (v,d=2) => (isFinite(v)?v:0).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dBR = iso => { if(!iso) return "—"; const d=new Date(iso.length===10?iso+"T12:00:00-03:00":iso); return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"}); };
+const diasDesde = iso => iso ? Math.floor((HOJE - new Date(iso.length===10?iso+"T12:00:00-03:00":iso))/864e5) : 999;
+function taxaTxt(p, t=rate(p)){
+  if (p.tipo==="cdi") return fmtN(t,0)+"% do CDI";
+  if (p.tipo==="selic") return "Selic + "+fmtN(t,2)+"%";
+  if (p.tipo==="pre") return fmtN(t,2)+"% a.a.";
+  if (p.tipo==="ipca") return "IPCA + "+fmtN(t,2)+"%";
+  return "0,5% a.m. + TR";
+}
+function freshChip(info){
+  if (info.manual) return '<span class="chip accent">Ajustada por você</span>';
+  const d = diasDesde(info.data);
+  if (info.fonte==="estimativa") return '<span class="chip warn">Estimativa</span>';
+  if (d<=7) return `<span class="chip good">Conferida ${dBR(info.data)}</span>`;
+  if (d<=30) return `<span class="chip warn">Conferida ${dBR(info.data)}</span>`;
+  return `<span class="chip crit">Confirmar no app · ${dBR(info.data)}</span>`;
+}
+
+/* ===================== MOTOR DE CÁLCULO ===================== */
+function aliq(dias){return dias<=180?.225:dias<=360?.20:dias<=720?.175:.15}
+function mesesAte(iso){ if(!iso) return Infinity; const v=new Date(iso+"T12:00:00-03:00"); return (v-D0)/(864e5*30.4375); }
+function selicAt(m, sc){
+  const s = SCEN[sc]||SCEN.estavel, mk=M(), delta = mk.selic-13.75, pts=s.pts;
+  if (m<=pts[0][0]) return pts[0][1]+delta;
+  for (let i=1;i<pts.length;i++){ if (m<=pts[i][0]){ const [m0,v0]=pts[i-1],[m1,v1]=pts[i]; return v0+(v1-v0)*(m-m0)/(m1-m0)+delta; } }
+  return pts[pts.length-1][1]+delta;
+}
+function cdiAt(m, sc){ const mk=M(); return selicAt(m,sc)-(mk.selic-mk.cdi); }
+function annual(p, m, sc){
+  const r = rate(p), mk = M(), vm = mesesAte(p.venc);
+  switch(p.tipo){
+    case "cdi": return m<vm ? cdiAt(m,sc)*r/100 : cdiAt(m,sc);
+    case "selic": return selicAt(m,sc)+r;
+    case "pre": return m<vm ? r : cdiAt(m,sc);
+    case "ipca": return m<vm ? ((1+(SCEN[sc]||SCEN.estavel).ipca/100)*(1+r/100)-1)*100 : cdiAt(m,sc);
+    case "poup": { const s=selicAt(m,sc); const mensal = s>8.5 ? 0.005 : (Math.pow(1+s*0.7/100,1/12)-1); return (Math.pow((1+mensal)*(1+mk.tr/100),12)-1)*100; }
+  }
+  return 0;
+}
+function simular(p, inicial, mensal, meses, sc){
+  const coh = inicial>0 ? [{pr:inicial,v:inicial,m:0}] : [];
+  const out = [];
+  const foto = m => {
+    let bruto=0,inv=0,ir=0;
+    for (const c of coh){ bruto+=c.v; inv+=c.pr; if (p.ir==="reg") ir+=Math.max(c.v-c.pr,0)*aliq((m-c.m)*30.4375); }
+    out.push({m,bruto,inv,ir,liq:bruto-ir});
+  };
+  foto(0);
+  for (let m=1;m<=meses;m++){
+    const r = Math.pow(1+annual(p,m-1,sc)/100,1/12)-1;
+    for (const c of coh) c.v*=1+r;
+    if (p.custodia){
+      const tot = coh.reduce((s,c)=>s+c.v,0);
+      const fee = Math.max(0,tot-(p.isencao||0))*p.custodia/100/12;
+      if (tot>0){ const f=1-fee/tot; for (const c of coh) c.v*=f; }
+    }
+    if (mensal>0) coh.push({pr:mensal,v:mensal,m});
+    foto(m);
+  }
+  return out;
+}
+function liq12(p, valor, sc){ const s=simular(p,valor,0,12,sc); return s[12].liq-valor; }
+
+/* ===================== PERSISTÊNCIA ===================== */
+function salvar(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ try{ localStorage.setItem("pp-perfil", JSON.stringify(perfil)); }catch(e){} }, 400);
+}
+function normalizar(o){
+  const p = Object.assign(clone(DEF_PERFIL), o||{});
+  for (const k of ["comp","meta","renda"]) p[k] = Object.assign(clone(DEF_PERFIL[k]), (o||{})[k]||{});
+  if (!Array.isArray(p.posicoes)) p.posicoes = [];
+  p.overrides = p.overrides||{}; p.mkOverrides = p.mkOverrides||{};
+  return p;
+}
+function carregarLocal(){ try{ const s=localStorage.getItem("pp-perfil"); if(s) perfil=normalizar(JSON.parse(s)); }catch(e){} }
+
+const FONTES_DADOS = ["data/mercado.json","https://raw.githubusercontent.com/paulohtai/painel-patrimonial/main/data/mercado.json"];
+async function carregarMercado(){
+  const pega = async u => { try{ const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"}); if(!r.ok) return null; const j=await r.json(); return j&&j.selic?j:null; }catch(e){ return null; } };
+  const res = (await Promise.all(FONTES_DADOS.map(pega))).filter(Boolean);
+  if (res.length){
+    res.sort((a,b)=>new Date(b.atualizadoEm)-new Date(a.atualizadoEm));
+    mktRemote = res[0]; mktErro = false;
+  } else mktErro = true;
+  render();
+}
+
+/* ===================== STATUS ===================== */
+function setStatus(){
+  const mk = M(); const d = diasDesde(mk.atualizadoEm);
+  const dot = document.getElementById("statusDot"), txt = document.getElementById("statusTxt");
+  const when = new Date(mk.atualizadoEm);
+  const lab = when.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+  dot.className = "dot " + (d<=1?"good":d<=4?"warn":"crit");
+  txt.textContent = (mktErro?"Offline · ":"")+"Dados de "+lab;
+}
+
+/* ===================== VIEWS ===================== */
+const VIEWS = {painel, reserva, comparar, metas, renda, carteira, taxas};
+function rota(){ const h=(location.hash||"#painel").slice(1); return VIEWS[h]?h:"painel"; }
+function render(){
+  setStatus();
+  const r = rota();
+  document.querySelectorAll("nav.tabs a").forEach(a=>a.setAttribute("aria-current", a.getAttribute("href")==="#"+r ? "page" : "false"));
+  Object.values(charts).forEach(c=>c&&c.destroy()); charts={};
+  const app = document.getElementById("app");
+  const ae = document.activeElement; const fid = ae && ae.id; const sel = ae && ae.selectionStart;
+  app.innerHTML = VIEWS[r]();
+  bind(r);
+  if (fid){ const el=document.getElementById(fid); if(el){ el.focus(); try{ if(sel!=null) el.setSelectionRange(sel,sel);}catch(e){} } }
+}
+window.addEventListener("hashchange", ()=>{ render(); window.scrollTo(0,0); });
+
+function liquidos(){ return P.filter(p=>["diaria","imediata","d1"].includes(p.liq)); }
+function rankReserva(valor, sc="estavel"){
+  return liquidos().map(p=>({p, info:prodInfo(p), g:liq12(p,valor,sc)})).sort((a,b)=>b.g-a.g);
+}
+
+function painel(){
+  const mk = M(); const val = perfil.reservaValor||0; const atual = byId(perfil.reservaAtual)||byId("bb");
+  const rk = rankReserva(val); const best = rk[0]; const gAtual = liq12(atual,val,"estavel");
+  const perda = best.g - gAtual;
+  const real = ((1+mk.cdi/100)/(1+mk.focusIpca/100)-1)*100;
+  const tags = {juros:"Juros",risco:"Risco",acao:"Ação",agenda:"Agenda"};
+  return `<section class="view">
+  <div>
+    <div class="eyebrow">Visão geral · ${new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"})}</div>
+    <h2 class="title">Seu dinheiro trabalhando no ritmo certo</h2>
+  </div>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Reserva de emergência</div>
+      <div class="big num">${brl(val)}</div>
+      <p>${perda>1?`Hoje em ${esc(atual.inst)} (${taxaTxt(atual)}), ela rende <b class="num">${brl(gAtual)}</b> líquidos por ano. Em ${esc(best.p.inst)} renderia <b class="num">${brl(best.g)}</b>, mantendo FGC e resgate diário.`:`Sua reserva já está na opção de maior rendimento entre as de liquidez diária.`}</p>
+      <a class="cta" href="#reserva">Ver plano da reserva →</a>
+    </div>
+    <div class="side">
+      <div class="kv"><span>Rende hoje (12 meses)</span><b class="num">${brl(gAtual)}</b></div>
+      <div class="kv"><span>Melhor opção</span><b class="num up">${brl(best.g)}</b></div>
+      <div class="kv"><span>Diferença por ano</span><b class="num up">+${brl(Math.max(perda,0))}</b></div>
+      <div class="kv"><span>Diferença por mês</span><b class="num up">+${brl(Math.max(perda,0)/12)}</b></div>
+    </div>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="k">Selic</div><div class="v num">${pct(mk.selic)}</div><div class="s">próximo Copom ${esc(mk.proxCopom)}</div></div>
+    <div class="tile"><div class="k">CDI</div><div class="v num">${pct(mk.cdi)}</div><div class="s">ao ano</div></div>
+    <div class="tile"><div class="k">IPCA 12 meses</div><div class="v num">${pct(mk.ipca12m)}</div><div class="s">IBGE, até ${esc(mk.ipcaRef)}</div></div>
+    <div class="tile"><div class="k">Juro real</div><div class="v num">${pct(real)}</div><div class="s">CDI acima do IPCA esperado</div></div>
+    <div class="tile"><div class="k">Focus IPCA ${mk.focusAno}</div><div class="v num">${pct(mk.focusIpca)}</div><div class="s">mediana do mercado</div></div>
+    <div class="tile"><div class="k">Focus Selic fim/${String(mk.focusAno).slice(2)}</div><div class="v num">${pct(mk.focusSelic)}</div><div class="s">mediana do mercado</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3>Leitura de ${esc(mk.notasRef)}</h3><span class="tiny">Copom, Tesouro Direto e Focus</span>
+      </div>
+      <ul class="notes" style="margin-top:14px">
+        ${(mk.notas||[]).map(n=>`<li><span class="tag ${esc(n.t)}">${tags[n.t]||"Nota"}</span><span>${esc(n.x)}</span></li>`).join("")}
+      </ul>
+    </div>
+    <div class="card stack">
+      <h3>Onde cada dinheiro deve ficar</h3>
+      <div class="callout info"><b>Reserva de emergência</b><br>Pós-fixado com liquidez diária e FGC. Hoje o melhor é <b>${esc(best.p.inst)}</b> a ${taxaTxt(best.p)}.</div>
+      <div class="callout"><b>Dinheiro para depois de 2029</b><br>Tesouro Prefixado 2029 a ${pct(rate(byId("pre29")))} ou IPCA+ 2032 a IPCA + ${pct(rate(byId("ipca32")))}, comprados aos poucos e levados até o vencimento.</div>
+      <a class="btn ghost" href="#comparar" style="text-align:center;text-decoration:none">Comparar todos os produtos</a>
+    </div>
+  </div>
+  ${instalado()?"":`<div class="card flat install">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="small"><b>Instale no iPhone</b>No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início. O painel abre como app, funciona offline e o iPhone não apaga seus dados salvos.</div>
+  </div>`}
+</section>`;
+}
+function instalado(){ try{ return window.navigator.standalone===true || window.matchMedia("(display-mode: standalone)").matches; }catch(e){ return false; } }
+
+function reserva(){
+  const val = perfil.reservaValor||0, atual = byId(perfil.reservaAtual)||byId("bb");
+  const rk = rankReserva(val); const gAtual = liq12(atual,val,"estavel");
+  const custo = perfil.custoMensal, meta = custo ? custo*(perfil.mesesMeta||6) : null;
+  const cob = custo ? val/custo : null; const best = rk[0];
+  return `<section class="view">
+  <div><div class="eyebrow">Reserva de emergência</div><h2 class="title">Segurança primeiro, rendimento em seguida</h2>
+  <p class="lede">Só entram aqui produtos com garantia e resgate em até um dia útil. O ranking usa o CDI de hoje por 12 meses e o IR de 17,5%.</p></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label for="rVal">Valor da reserva</label><div class="input"><span>R$</span><input id="rVal" type="number" min="0" step="500" value="${val}"></div></div>
+      <div class="field"><label for="rAtual">Onde está hoje</label><div class="input"><select id="rAtual">${liquidos().map(p=>`<option value="${p.id}" ${p.id===atual.id?"selected":""}>${esc(p.inst)} · ${taxaTxt(p)}</option>`).join("")}</select></div></div>
+      <div class="field"><label for="rCusto">Custo mensal da casa</label><div class="input"><span>R$</span><input id="rCusto" type="number" min="0" step="100" value="${custo??""}" placeholder="Informe"></div></div>
+      <div class="field"><label for="rMeses">Meses de cobertura</label><div class="input"><select id="rMeses">${[3,6,9,12].map(n=>`<option ${n===perfil.mesesMeta?"selected":""} value="${n}">${n} meses</option>`).join("")}</select></div></div>
+    </div>
+    ${meta?`<div class="stack" style="margin-top:16px">
+      <div class="row" style="justify-content:space-between;align-items:baseline"><b>${cob>=perfil.mesesMeta?"Meta atingida":"Progresso da meta"}</b><span class="num small">${brl(val)} de ${brl(meta)}</span></div>
+      <div class="progress" role="progressbar" aria-valuenow="${Math.round(Math.min(val/meta,1)*100)}" aria-valuemin="0" aria-valuemax="100"><div style="width:${Math.min(val/meta,1)*100}%"></div></div>
+      <div class="small muted">Cobre <b class="num">${fmtN(cob,1)} meses</b> de despesas. ${cob>=perfil.mesesMeta?`Sobra de ${brl(val-meta)} pode ir para o longo prazo.`:`Faltam ${brl(meta-val)} para ${perfil.mesesMeta} meses.`}</div>
+    </div>`:`<p class="small muted" style="margin:14px 0 0">Informe o custo mensal da casa para ver quantos meses a reserva cobre.</p>`}
+  </div>
+  <div class="grid2">
+    <div class="card stack">
+      <div class="row" style="justify-content:space-between;align-items:center"><h3>Ranking para ${brl(val)}</h3><span class="tiny">líquido em 12 meses</span></div>
+      <div class="rank">
+      ${rk.map((x,i)=>{ const d=x.g-gAtual; const cur=x.p.id===atual.id; return `<div class="ritem ${i===0?"top":""} ${cur?"cur":""}">
+        <div class="pos">${i+1}</div>
+        <div style="min-width:0"><div class="nm">${esc(x.p.inst)} <span class="muted" style="font-weight:500">· ${esc(x.p.nome)}</span></div>
+          <div class="meta"><span class="chip neutral">${taxaTxt(x.p)}</span><span class="chip neutral">${esc(x.p.liqTxt)}</span>${x.p.gar!=="FGC"?`<span class="chip neutral">${esc(x.p.gar)}</span>`:""}${freshChip(x.info)}${cur?'<span class="chip accent">Onde está hoje</span>':""}</div>
+          ${x.p.cond?`<div class="tiny" style="margin-top:4px">${esc(x.p.cond)}</div>`:""}</div>
+        <div class="val"><b>${brl(x.g)}</b><small class="${d>0?"delta up":d<0?"delta down":""}">${cur?"atual":(d>=0?"+":"")+brl(d)}</small></div>
+      </div>`;}).join("")}
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card stack">
+        <h3>Plano de ação</h3>
+        ${best.p.id===atual.id?`<p class="small" style="margin:0">Você já está na melhor opção do ranking. Revise as taxas uma vez por mês.</p>`:`
+        <ol class="steps small">
+          <li>Abra a conta em <b>${esc(best.p.inst)}</b> pelo app oficial. ${best.p.cond?esc(best.p.cond)+".":""}</li>
+          <li>No app, confira se o produto está marcado como <b>liquidez diária</b> e se a taxa é ${taxaTxt(best.p)}.</li>
+          <li>Resgate a reserva em ${esc(atual.inst)} e transfira por Pix para a sua conta em ${esc(best.p.inst)}.</li>
+          <li>Aplique tudo de uma vez e só resgate em emergência. Antes de 30 dias há IOF sobre o rendimento.</li>
+        </ol>`}
+        <div class="callout small">Diferença de ${brl(best.g-gAtual)} por ano, ou ${brl((best.g-gAtual)/12)} por mês, sem perder garantia nem liquidez.</div>
+      </div>
+      <div class="card stack">
+        <h3>Regras da reserva</h3>
+        <ul class="steps small">
+          <li>FGC cobre até R$ 250 mil por CPF em cada instituição.</li>
+          <li>Prefixado e IPCA+ ficam fora: oscilam de preço e podem dar prejuízo no resgate antecipado.</li>
+          <li>Taxas promocionais de 130% ou mais costumam durar poucos dias e ter teto baixo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>`;
+}
+
+function comparar(){
+  const c = perfil.comp;
+  const filtro = c.filtro;
+  let lista = P.filter(p => filtro==="todos" || (filtro==="diaria" ? ["diaria","imediata","d1"].includes(p.liq) : ["mercado","venc"].includes(p.liq)));
+  const res = lista.map(p=>{ const s=simular(p,c.inicial,c.mensal,c.meses,c.cen); const f=s[c.meses]; return {p,s,f,aa:f.inv>0?(Math.pow(f.liq/f.inv,12/c.meses)-1)*100:0}; }).sort((a,b)=>b.f.liq-a.f.liq);
+  if (!c.vis) c.vis = res.slice(0,5).map(x=>x.p.id);
+  const vis = res.filter(x=>c.vis.includes(x.p.id));
+  const atual = byId(perfil.reservaAtual)||byId("bb");
+  const sc = SCEN[c.cen];
+  return `<section class="view">
+  <div><div class="eyebrow">Comparador</div><h2 class="title">${P.length} produtos, três cenários de juros</h2>
+  <p class="lede">Os pós-fixados acompanham o caminho da Selic no cenário escolhido. Prefixados e IPCA+ travam a taxa até o vencimento e depois passam a render o CDI.</p></div>
+  <div class="card stack">
+    <div class="row">
+      <div class="field"><label for="cIni">Aporte inicial</label><div class="input"><span>R$</span><input id="cIni" type="number" min="0" step="500" value="${c.inicial}"></div></div>
+      <div class="field"><label for="cMen">Aporte mensal</label><div class="input"><span>R$</span><input id="cMen" type="number" min="0" step="100" value="${c.mensal}"></div></div>
+      <div class="field" style="flex:2 1 220px"><label for="cPrazo">Prazo: <span class="num">${c.meses} meses (${fmtN(c.meses/12,1)} anos)</span></label><input id="cPrazo" type="range" min="6" max="240" value="${c.meses}"></div>
+    </div>
+    <div class="row">
+      <div class="field" style="flex:2 1 300px"><label>Cenário de juros</label><div class="seg" id="cCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===c.cen}">${v.nome}</button>`).join("")}</div></div>
+      <div class="field" style="flex:1 1 240px"><label>Liquidez</label><div class="seg" id="cFil">${[["todos","Todos"],["diaria","Diária"],["longo","Longo prazo"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===filtro}">${v}</button>`).join("")}</div></div>
+    </div>
+    <div class="tiny">${esc(sc.desc)}. IPCA considerado: ${pct(sc.ipca,1)} ao ano.</div>
+  </div>
+  <div class="card stack">
+    <div class="row" style="justify-content:space-between;align-items:center"><h3>Patrimônio líquido ao longo do tempo</h3><span class="tiny">após IR e custódia</span></div>
+    <div class="legend" id="cLeg">${res.map((x,i)=>`<button type="button" data-id="${x.p.id}" aria-pressed="${c.vis.includes(x.p.id)}"><i style="background:var(${COLORS[i%COLORS.length]})"></i>${esc(rotulo(x.p))}</button>`).join("")}</div>
+    <div class="chartbox"><canvas id="cChart" aria-label="Gráfico de evolução do patrimônio"></canvas></div>
+  </div>
+  <div class="card stack">
+    <h3>Ranking no mês ${c.meses}</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Produto</th><th>Taxa</th><th>Liquidez</th><th class="r">Bruto</th><th class="r">IR</th><th class="r">Líquido</th><th class="r">Ganho</th><th class="r">≈ a.a. líq.</th></tr></thead>
+      <tbody>${res.map((x,i)=>`<tr class="${i===0?"hl":""}"><td class="num">${i+1}</td>
+        <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${x.p.id===atual.id?' <span class="chip accent">atual</span>':""}</td>
+        <td>${taxaTxt(x.p)}</td><td class="small">${esc(x.p.liqTxt)}</td>
+        <td class="r num">${brl(x.f.bruto)}</td><td class="r num">${x.f.ir>0?"-"+brl(x.f.ir):"isento"}</td>
+        <td class="r num"><b>${brl(x.f.liq)}</b></td><td class="r num">${brl(x.f.liq-x.f.inv)}</td><td class="r num">${pct(x.aa)}</td></tr>`).join("")}</tbody>
+    </table></div>
+    <p class="tiny" style="margin:0">Total aportado: ${brl(res[0]?res[0].f.inv:0)}. Prefixados e IPCA+ sem marcação a mercado, ou seja, supondo que você segura até o vencimento.</p>
+  </div>
+</section>`;
+}
+
+function metas(){
+  const g = perfil.meta, p = byId(g.produto)||byId("bv");
+  let mesAt = null; const s = simular(p,g.inicial,g.mensal,600,g.cen);
+  for (const x of s) if (x.liq>=g.alvo){ mesAt=x.m; break; }
+  const prazos = [36,60,120];
+  const precisa = prazos.map(n=>{ let lo=0,hi=g.alvo; for(let i=0;i<40;i++){ const mid=(lo+hi)/2; const r=simular(p,g.inicial,mid,n,g.cen)[n].liq; if(r>=g.alvo) hi=mid; else lo=mid; } return {n,v:hi}; });
+  const chegada = mesAt!=null ? new Date(D0.getTime()+mesAt*30.4375*864e5) : null;
+  const fim = mesAt!=null ? s[mesAt] : null;
+  return `<section class="view">
+  <div><div class="eyebrow">Metas</div><h2 class="title">Quando você chega lá</h2>
+  <p class="lede">Escolha o alvo e o produto. O cálculo mostra a data provável e quanto aportar por mês para chegar antes.</p></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label for="gAlvo">Meta</label><div class="input"><span>R$</span><input id="gAlvo" type="number" min="1000" step="5000" value="${g.alvo}"></div></div>
+      <div class="field"><label for="gIni">Já tenho</label><div class="input"><span>R$</span><input id="gIni" type="number" min="0" step="500" value="${g.inicial}"></div></div>
+      <div class="field"><label for="gMen">Aporte mensal</label><div class="input"><span>R$</span><input id="gMen" type="number" min="0" step="100" value="${g.mensal}"></div></div>
+      <div class="field" style="flex:2 1 220px"><label for="gProd">Produto</label><div class="input"><select id="gProd">${P.map(x=>`<option value="${x.id}" ${x.id===p.id?"selected":""}>${esc(x.inst==="Tesouro Direto"?x.nome:x.inst+" · "+x.nome)} · ${taxaTxt(x)}</option>`).join("")}</select></div></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label>Cenário de juros</label><div class="seg" id="gCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===g.cen}">${v.nome}</button>`).join("")}</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card stack">
+      ${mesAt!=null?`<div class="eyebrow">Chegada prevista</div>
+      <div style="font-family:var(--f-display);font-weight:800;font-size:clamp(28px,6vw,40px);letter-spacing:-.02em">${chegada.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</div>
+      <div class="kpis">
+        <div class="kpi"><span>Tempo</span><b>${Math.floor(mesAt/12)}a ${mesAt%12}m</b></div>
+        <div class="kpi"><span>Você aporta</span><b>${brl(fim.inv)}</b></div>
+        <div class="kpi"><span>Os juros dão</span><b style="color:var(--good)">${brl(fim.liq-fim.inv)}</b></div>
+        <div class="kpi"><span>Parte dos juros</span><b>${pct((fim.liq-fim.inv)/fim.liq*100,0)}</b></div>
+      </div>
+      <div class="chartbox" style="height:240px"><canvas id="gChart" aria-label="Gráfico da meta"></canvas></div>`
+      :`<p class="muted">Com esses valores a meta não é atingida em 50 anos. Aumente o aporte mensal.</p>`}
+    </div>
+    <div class="card stack">
+      <h3>Aporte necessário por prazo</h3>
+      ${precisa.map(x=>`<div class="row" style="justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px"><span>Em ${x.n/12} anos</span><b class="num">${x.v<1?"já chega":brl(x.v)+"/mês"}</b></div>`).join("")}
+      <p class="tiny" style="margin:0">Na fase inicial o tamanho do aporte pesa mais que a taxa. Depois de alguns anos, os juros passam a fazer a maior parte do trabalho.</p>
+    </div>
+  </div>
+</section>`;
+}
+
+function renda(){
+  const r = perfil.renda, p = byId(r.produto)||byId("ipca40"), mk = M();
+  const bruta = annual(p,0,"estavel"), liqA = bruta*(p.ir==="reg"?0.85:1)-(p.custodia||0);
+  const ipcaP = SCEN.focus.ipca;
+  const nomM = r.patrimonio*(Math.pow(1+liqA/100,1/12)-1);
+  const realA = ((1+liqA/100)/(1+ipcaP/100)-1)*100;
+  const realM = r.patrimonio*(Math.pow(1+realA/100,1/12)-1);
+  const anos = [1,5,10,20].map(n=>({n, pc: r.patrimonio/Math.pow(1+ipcaP/100,n)}));
+  return `<section class="view">
+  <div><div class="eyebrow">Renda passiva</div><h2 class="title">Quanto o patrimônio paga por mês</h2>
+  <p class="lede">Sacar todo o rendimento parece mais renda, mas deixa a inflação comer o patrimônio. Sacar só o ganho real mantém o poder de compra para sempre.</p></div>
+  <div class="card"><div class="row">
+    <div class="field"><label for="nPat">Patrimônio</label><div class="input"><span>R$</span><input id="nPat" type="number" min="0" step="10000" value="${r.patrimonio}"></div></div>
+    <div class="field" style="flex:2 1 240px"><label for="nProd">Aplicado em</label><div class="input"><select id="nProd">${P.filter(x=>x.liq!=="venc").map(x=>`<option value="${x.id}" ${x.id===p.id?"selected":""}>${esc(x.inst==="Tesouro Direto"?x.nome:x.inst+" · "+x.nome)} · ${taxaTxt(x)}</option>`).join("")}</select></div></div>
+  </div></div>
+  <div class="grid2">
+    <div class="card stack">
+      <div class="kpis">
+        <div class="kpi"><span>Sacando tudo</span><b>${brl(nomM)}/mês</b></div>
+        <div class="kpi"><span>Sacando só o ganho real</span><b style="color:var(--good)">${brl(realM)}/mês</b></div>
+        <div class="kpi"><span>Taxa líquida</span><b>${pct(liqA)}</b></div>
+        <div class="kpi"><span>Ganho real</span><b>${pct(realA)}</b></div>
+      </div>
+      <div class="callout info small">A diferença entre os dois valores, ${brl(nomM-realM)} por mês, deve ser reaplicada para repor a inflação de ${pct(ipcaP,1)} ao ano.</div>
+    </div>
+    <div class="card stack">
+      <h3>Se sacar tudo, o patrimônio encolhe</h3>
+      ${anos.map(a=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px"><span>Em ${a.n} ${a.n>1?"anos":"ano"}</span><span class="num">${brl(r.patrimonio)} valem <b>${brl(a.pc)}</b> de hoje</span></div>`).join("")}
+      <p class="tiny" style="margin:0">Para renda previsível, o Tesouro IPCA+ trava o ganho real contratado, desde que levado até o vencimento.</p>
+    </div>
+  </div>
+</section>`;
+}
+
+function avaliarPos(x){
+  const p = byId(x.produto); if(!p) return null;
+  const dias = Math.max(0, Math.floor((HOJE - new Date(x.data+"T12:00:00-03:00"))/864e5));
+  const aa = annual(p,0,"estavel");
+  let bruto = x.valor*Math.pow(1+aa/100, dias/365);
+  if (p.custodia) bruto -= Math.max(0,x.valor-(p.isencao||0))*p.custodia/100*dias/365;
+  const ganho = Math.max(bruto-x.valor,0);
+  const iof = dias<30 ? ganho*IOF[Math.max(dias,1)-1]/100 : 0;
+  const ir = p.ir==="reg" ? (ganho-iof)*aliq(dias) : 0;
+  return {p,dias,bruto,ganho,iof,ir,liq:bruto-iof-ir};
+}
+function carteira(){
+  const ps = perfil.posicoes||[];
+  const av = ps.map(x=>({x,a:avaliarPos(x)})).filter(y=>y.a);
+  const tot = av.reduce((s,y)=>s+y.a.bruto,0), totLiq = av.reduce((s,y)=>s+y.a.liq,0), totApl = av.reduce((s,y)=>s+y.x.valor,0);
+  const rendAno = av.reduce((s,y)=>s+liq12(y.a.p,y.a.bruto,"estavel"),0);
+  return `<section class="view">
+  <div><div class="eyebrow">Minha carteira</div><h2 class="title">O que você tem e quanto rende</h2>
+  <p class="lede">Estimativa com as taxas atuais. O valor oficial é o do extrato da instituição.</p>
+  <p class="tiny" style="margin:6px 0 0">Salvo só neste aparelho. Faça um backup para levar a outro aparelho.</p></div>
+  <div class="kpis">
+    <div class="kpi"><span>Aplicado</span><b>${brl(totApl)}</b></div>
+    <div class="kpi"><span>Valor estimado</span><b>${brl(tot)}</b></div>
+    <div class="kpi"><span>Se resgatar hoje</span><b>${brl(totLiq)}</b></div>
+    <div class="kpi"><span>Renda líquida em 12 meses</span><b style="color:var(--good)">${brl(rendAno)}</b></div>
+  </div>
+  <div class="card stack">
+    <div class="pos-list">
+    ${av.length?av.map(({x,a})=>`<div class="pos-card">
+      <div class="pos-head"><div><b>${esc(x.nome)}</b> ${x.reserva?'<span class="chip accent">Reserva</span>':""}<div class="tiny">${esc(a.p.inst)} · ${esc(a.p.nome)} · ${taxaTxt(a.p)} · desde ${dBR(x.data)}</div></div>
+      <button class="btn link" data-del="${esc(x.id)}">Remover</button></div>
+      <div class="pos-grid">
+        <div><span>Aplicado</span><b>${brl(x.valor,2)}</b></div>
+        <div><span>Estimado hoje</span><b>${brl(a.bruto,2)}</b></div>
+        <div><span>IR hoje</span><b>${a.ir>0?brl(a.ir,2):"isento ou zero"}</b></div>
+        <div><span>IOF hoje</span><b>${a.iof>0?brl(a.iof,2):"zero"}</b></div>
+        <div><span>Líquido hoje</span><b>${brl(a.liq,2)}</b></div>
+        <div><span>Alíquota de IR</span><b>${a.p.ir==="reg"?pct(aliq(a.dias)*100,1):"isento"}</b></div>
+      </div>
+      ${a.dias<30?`<div class="tiny">IOF zera em ${30-a.dias} dias. A alíquota de IR cai para 20% após 180 dias.</div>`:a.p.ir==="reg"&&a.dias<=720?`<div class="tiny">IR cai para ${pct((a.dias<=180?.20:a.dias<=360?.175:.15)*100,1)} em ${(a.dias<=180?181:a.dias<=360?361:721)-a.dias} dias.</div>`:""}
+    </div>`).join(""):`<div class="stack"><p class="muted" style="margin:0">Nenhuma aplicação cadastrada. Comece pela reserva de emergência ou use o formulário abaixo.</p>
+      <div><button class="btn" id="addReserva" type="button">Cadastrar reserva de ${brl(perfil.reservaValor||0)} em ${esc((byId(perfil.reservaAtual)||byId("bb")).inst)}</button></div></div>`}
+    </div>
+  </div>
+  <div class="card stack">
+    <h3>Adicionar aplicação</h3>
+    <form class="row" id="posForm">
+      <div class="field" style="flex:2 1 200px"><label for="pNome">Nome</label><div class="input"><input id="pNome" required placeholder="Ex.: Reserva no BV" style="font-family:var(--f-body)"></div></div>
+      <div class="field" style="flex:2 1 220px"><label for="pProd">Produto</label><div class="input"><select id="pProd">${P.map(x=>`<option value="${x.id}">${esc(x.inst==="Tesouro Direto"?x.nome:x.inst+" · "+x.nome)}</option>`).join("")}</select></div></div>
+      <div class="field"><label for="pVal">Valor</label><div class="input"><span>R$</span><input id="pVal" type="number" min="1" step="0.01" required></div></div>
+      <div class="field"><label for="pData">Data</label><div class="input"><input id="pData" type="date" value="${new Date().toISOString().slice(0,10)}" required></div></div>
+      <label class="small" style="display:flex;gap:6px;align-items:center;flex:1 1 140px;padding-bottom:10px"><input id="pRes" type="checkbox"> Faz parte da reserva</label>
+      <button class="btn">Adicionar</button>
+    </form>
+  </div>
+  <div class="card stack">
+    <h3>Backup</h3>
+    <p class="small muted" style="margin:0">Copie o código abaixo e guarde nas Notas. Para restaurar em outro aparelho, cole no campo e toque em Restaurar.</p>
+    <div class="row">
+      <button class="btn ghost" id="bkCopiar" type="button">Copiar backup</button>
+      <button class="btn ghost" id="bkBaixar" type="button">Baixar arquivo</button>
+    </div>
+    <div class="field"><label for="bkTexto">Restaurar a partir de um backup</label><textarea id="bkTexto" rows="3" style="width:100%;border-radius:10px;border:1.5px solid var(--line);background:var(--surface-2);padding:10px;font-family:var(--f-num);font-size:12px;color:var(--ink)" placeholder="Cole aqui o código do backup"></textarea></div>
+    <div class="row"><button class="btn" id="bkRestaurar" type="button">Restaurar</button><span class="small" id="bkMsg" role="status"></span></div>
+  </div>
+</section>`;
+}
+
+function taxas(){
+  const mk = M();
+  const grupos = [["Liquidez diária",p=>["diaria","imediata","d1"].includes(p.liq)],["Longo prazo",p=>["mercado","venc"].includes(p.liq)]];
+  const ind = [["selic","Selic meta","% a.a."],["cdi","CDI","% a.a."],["ipca12m","IPCA 12 meses","%"],["focusIpca","Focus IPCA "+mk.focusAno,"%"],["focusSelic","Focus Selic fim/"+String(mk.focusAno).slice(2),"%"],["tr","TR mensal (poupança)","% a.m."]];
+  return `<section class="view">
+  <div><div class="eyebrow">Taxas e fontes</div><h2 class="title">Cada número com origem e data</h2>
+  <p class="lede">Os indicadores e as taxas do Tesouro são atualizados por uma tarefa automática em dias úteis. Taxas de bancos só mudam aqui quando há fonte com data recente. Um ajuste seu vale só para você e pode ser desfeito.</p></div>
+  <div class="card stack">
+    <div class="row" style="justify-content:space-between;align-items:center"><h3>Indicadores</h3><span class="tiny">Última atualização: ${new Date(mk.atualizadoEm).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} · ${esc(mk.fonte)}</span></div>
+    <div class="row">${ind.map(([k,l,u])=>`<div class="field"><label for="mk-${k}">${l}</label><div class="input"><input id="mk-${k}" data-mk="${k}" type="number" step="0.01" value="${mk[k]}"><span>${u}</span></div></div>`).join("")}</div>
+  </div>
+  ${grupos.map(([g,f])=>`<div class="card stack"><h3>${g}</h3>
+    <div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Produto</th><th>Taxa</th><th>Fonte</th><th>Situação</th><th class="r">Ajustar</th></tr></thead><tbody>
+    ${P.filter(f).map(p=>{const i=prodInfo(p); return `<tr><td><b>${esc(p.inst==="Tesouro Direto"?p.nome:p.inst)}</b>${p.inst!=="Tesouro Direto"?`<div class="tiny">${esc(p.nome)}</div>`:""}</td>
+      <td class="num">${taxaTxt(p,i.taxa)}</td><td class="small">${esc(i.fonte)}</td><td>${freshChip(i)}</td>
+      <td class="r">${p.tipo==="poup"?'<span class="tiny">regra fixa</span>':`<div class="input" style="display:inline-flex;width:120px"><input data-ov="${p.id}" type="number" step="0.01" value="${i.manual?i.taxa:""}" placeholder="${fmtN(i.taxa,2)}" aria-label="Ajustar taxa de ${esc(p.inst)}"></div>`}</td></tr>`;}).join("")}
+    </tbody></table></div></div>`).join("")}
+  <div class="row"><button class="btn ghost" id="resetOv">Desfazer meus ajustes</button></div>
+</section>`;
+}
+
+/* ===================== EVENTOS ===================== */
+function num(v){ const n=parseFloat(v); return isFinite(n)?n:0; }
+function on(id, ev, fn){ const el=document.getElementById(id); if(el) el.addEventListener(ev, fn); }
+let inputTimer=null;
+function softRender(){ clearTimeout(inputTimer); inputTimer=setTimeout(()=>{render();salvar();},350); }
+
+function bind(r){
+  if (r==="reserva"){
+    on("rVal","input",e=>{perfil.reservaValor=num(e.target.value);softRender();});
+    on("rAtual","change",e=>{perfil.reservaAtual=e.target.value;render();salvar();});
+    on("rCusto","input",e=>{perfil.custoMensal=e.target.value?num(e.target.value):null;softRender();});
+    on("rMeses","change",e=>{perfil.mesesMeta=+e.target.value;render();salvar();});
+  }
+  if (r==="comparar"){
+    const c=perfil.comp;
+    on("cIni","input",e=>{c.inicial=num(e.target.value);softRender();});
+    on("cMen","input",e=>{c.mensal=num(e.target.value);softRender();});
+    on("cPrazo","input",e=>{c.meses=+e.target.value;softRender();});
+    document.querySelectorAll("#cCen button").forEach(b=>b.addEventListener("click",()=>{c.cen=b.dataset.v;render();salvar();}));
+    document.querySelectorAll("#cFil button").forEach(b=>b.addEventListener("click",()=>{c.filtro=b.dataset.v;c.vis=null;render();salvar();}));
+    document.querySelectorAll("#cLeg button").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.id; c.vis=c.vis.includes(id)?c.vis.filter(x=>x!==id):[...c.vis,id]; render(); salvar();}));
+    desenharComparador();
+  }
+  if (r==="metas"){
+    const g=perfil.meta;
+    on("gAlvo","input",e=>{g.alvo=num(e.target.value)||1;softRender();});
+    on("gIni","input",e=>{g.inicial=num(e.target.value);softRender();});
+    on("gMen","input",e=>{g.mensal=num(e.target.value);softRender();});
+    on("gProd","change",e=>{g.produto=e.target.value;render();salvar();});
+    document.querySelectorAll("#gCen button").forEach(b=>b.addEventListener("click",()=>{g.cen=b.dataset.v;render();salvar();}));
+    desenharMeta();
+  }
+  if (r==="renda"){
+    on("nPat","input",e=>{perfil.renda.patrimonio=num(e.target.value);softRender();});
+    on("nProd","change",e=>{perfil.renda.produto=e.target.value;render();salvar();});
+  }
+  if (r==="carteira"){
+    document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{perfil.posicoes=perfil.posicoes.filter(x=>x.id!==b.dataset.del);render();salvar();}));
+    on("posForm","submit",e=>{e.preventDefault();
+      const v=num(document.getElementById("pVal").value); if(v<=0) return;
+      perfil.posicoes.push({id:"p"+Date.now().toString(36),nome:document.getElementById("pNome").value.trim().slice(0,60)||"Aplicação",produto:document.getElementById("pProd").value,valor:v,data:document.getElementById("pData").value||new Date().toISOString().slice(0,10),reserva:document.getElementById("pRes").checked});
+      render();salvar();});
+    on("addReserva","click",()=>{ perfil.posicoes.push({id:"p"+Date.now().toString(36),nome:"Reserva de emergência",produto:perfil.reservaAtual||"bb",valor:perfil.reservaValor||0,data:new Date().toISOString().slice(0,10),reserva:true}); render(); salvar(); });
+    const bk = ()=>btoa(unescape(encodeURIComponent(JSON.stringify({app:"painel-patrimonial",v:1,em:new Date().toISOString(),perfil}))));
+    const msg = t=>{ const m=document.getElementById("bkMsg"); if(m) m.textContent=t; };
+    on("bkCopiar","click",async()=>{ const t=bk(); try{ await navigator.clipboard.writeText(t); msg("Backup copiado."); }catch(e){ const a=document.getElementById("bkTexto"); a.value=t; a.select(); msg("Selecionado. Copie manualmente."); } });
+    on("bkBaixar","click",()=>{ const b=new Blob([JSON.stringify({app:"painel-patrimonial",v:1,em:new Date().toISOString(),perfil},null,2)],{type:"application/json"}); const u=URL.createObjectURL(b); const a=document.createElement("a"); a.href=u; a.download="painel-patrimonial-backup-"+new Date().toISOString().slice(0,10)+".json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),2000); msg("Arquivo gerado."); });
+    on("bkRestaurar","click",()=>{ const t=(document.getElementById("bkTexto").value||"").trim(); if(!t){msg("Cole o código do backup primeiro.");return;}
+      try{ let o; try{ o=JSON.parse(t); }catch(e){ o=JSON.parse(decodeURIComponent(escape(atob(t)))); }
+        if(!o||o.app!=="painel-patrimonial"||!o.perfil) throw 0; perfil=normalizar(o.perfil); salvar(); render(); setTimeout(()=>msg("Backup restaurado."),0);
+      }catch(e){ msg("Esse código não é um backup válido do painel."); } });
+  }
+  if (r==="taxas"){
+    document.querySelectorAll("[data-mk]").forEach(i=>i.addEventListener("change",e=>{const k=e.target.dataset.mk; perfil.mkOverrides[k]=e.target.value===""?null:num(e.target.value); render();salvar();}));
+    document.querySelectorAll("[data-ov]").forEach(i=>i.addEventListener("change",e=>{const k=e.target.dataset.ov; if(e.target.value==="") delete perfil.overrides[k]; else perfil.overrides[k]=num(e.target.value); render();salvar();}));
+    on("resetOv","click",()=>{perfil.overrides={};perfil.mkOverrides={};render();salvar();});
+  }
+}
+
+/* ===================== GRÁFICOS ===================== */
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function baseOpts(){
+  const ink2=cssv("--ink-2"), line=cssv("--line");
+  return {responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:cssv("--surface"),titleColor:cssv("--ink"),bodyColor:cssv("--ink"),borderColor:line,borderWidth:1,padding:10,
+      callbacks:{title:it=>"Mês "+it[0].label,label:it=>" "+it.dataset.label+": "+brl(it.parsed.y)}}},
+    scales:{x:{grid:{display:false},ticks:{color:ink2,maxTicksLimit:8,callback:function(v){const m=+this.getLabelForValue(v);return m%12===0?(m/12)+"a":m+"m";}},border:{color:line}},
+      y:{grid:{color:line},ticks:{color:ink2,callback:v=>v>=1000?"R$ "+(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil":brl(v)},border:{display:false}}}};
+}
+function desenharComparador(){
+  if (!window.Chart) return;
+  const c=perfil.comp; const el=document.getElementById("cChart"); if(!el) return;
+  const filtro=c.filtro;
+  const lista=P.filter(p=>filtro==="todos"||(filtro==="diaria"?["diaria","imediata","d1"].includes(p.liq):["mercado","venc"].includes(p.liq)));
+  const res=lista.map(p=>({p,s:simular(p,c.inicial,c.mensal,c.meses,c.cen)})).sort((a,b)=>b.s[c.meses].liq-a.s[c.meses].liq);
+  const step=c.meses>120?6:c.meses>48?3:1; const idx=[]; for(let m=0;m<=c.meses;m+=step) idx.push(m); if(idx[idx.length-1]!==c.meses) idx.push(c.meses);
+  const ds=res.map((x,i)=>({x,i})).filter(o=>c.vis.includes(o.x.p.id)).map(o=>({label:rotulo(o.x.p),data:idx.map(m=>o.x.s[m].liq),borderColor:cssv(COLORS[o.i%COLORS.length]),backgroundColor:cssv(COLORS[o.i%COLORS.length]),borderWidth:o.i===0?3:2,pointRadius:0,tension:.2}));
+  ds.push({label:"Total aportado",data:idx.map(m=>res[0]?res[0].s[m].inv:0),borderColor:cssv("--ink-3"),borderDash:[5,5],borderWidth:1.5,pointRadius:0});
+  charts.c=new Chart(el,{type:"line",data:{labels:idx,datasets:ds},options:baseOpts()});
+}
+function desenharMeta(){
+  if (!window.Chart) return;
+  const el=document.getElementById("gChart"); if(!el) return;
+  const g=perfil.meta,p=byId(g.produto); const s=simular(p,g.inicial,g.mensal,600,g.cen);
+  let fim=s.findIndex(x=>x.liq>=g.alvo); if(fim<0) return;
+  const step=Math.max(1,Math.round(fim/40)); const idx=[]; for(let m=0;m<=fim;m+=step) idx.push(m); if(idx[idx.length-1]!==fim) idx.push(fim);
+  const o=baseOpts();
+  charts.g=new Chart(el,{type:"line",data:{labels:idx,datasets:[
+    {label:"Patrimônio líquido",data:idx.map(m=>s[m].liq),borderColor:cssv("--accent"),backgroundColor:cssv("--accent-soft"),fill:true,borderWidth:2.5,pointRadius:0,tension:.2},
+    {label:"Total aportado",data:idx.map(m=>s[m].inv),borderColor:cssv("--ink-3"),borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:o});
+}
+
+/* ===================== INÍCIO ===================== */
+carregarLocal();
+render();
+carregarMercado();
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && diasDesde(M().atualizadoEm)>=1) carregarMercado(); });
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>render());
+new MutationObserver(()=>render()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+document.getElementById("temaBtn").addEventListener("click",()=>{
+  const el=document.documentElement, escuroAgora = el.getAttribute("data-theme") ? el.getAttribute("data-theme")==="dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const novo = escuroAgora ? "light" : "dark"; el.setAttribute("data-theme",novo); try{ localStorage.setItem("pp-tema",novo); }catch(e){}
+});
+if ("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

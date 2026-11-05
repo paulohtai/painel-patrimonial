@@ -1,0 +1,25 @@
+{
+  "atualizadoEm": "2026-11-05T14:30-03:00",
+  "fonte": "Copom 04/11, Tesouro Direto 03/11, Focus 03/11",
+  "selic": 13.75,
+  "cdi": 13.65,
+  "ipca12m": 4.57,
+  "ipcaRef": "set/26",
+  "focusIpca": 5.22,
+  "focusSelic": 13.5,
+  "focusAno": 2026,
+  "tr": 0.15,
+  "proxCopom": "09/12",
+  "ata": "10/11",
+  "notasRef": "novembro de 2026",
+  "notas": [
+    {"t": "juros", "x": "Copom manteve a Selic em 13,75% em 04/11, por unanimidade, e interrompeu a sequência de cinco cortes iniciada em março."},
+    {"t": "risco", "x": "Após o segundo turno, a preocupação com as contas públicas abriu as taxas do Tesouro: prefixados acima de 15% e IPCA+ 2032 perto de 8% de juro real."},
+    {"t": "juros", "x": "Focus projeta inflação de 5,22% em 2026 e Selic de 13,50% no fim do ano. Parte dos economistas espera nova manutenção em dezembro."},
+    {"t": "acao", "x": "Reserva de emergência: pós-fixado com liquidez diária. Juros parados por mais tempo favorecem quem está no CDI."},
+    {"t": "acao", "x": "Dinheiro de longo prazo: as taxas atuais do Tesouro são historicamente altas. Entrada gradual, só com dinheiro que pode esperar o vencimento."},
+    {"t": "agenda", "x": "Ata do Copom em 10/11. Próxima reunião em 08 e 09/12."}
+  ],
+  "produtos": {},
+  "status": {}
+}
