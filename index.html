@@ -267,6 +267,8 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 .bars{display:inline-flex;gap:2px;align-items:flex-end}
 .bars i{width:4px;height:10px;border-radius:2px;background:currentColor;opacity:.22}
 .bars i.on{opacity:1}
+.mtm{margin-top:6px;font-size:12px;line-height:1.5;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:6px 8px;max-width:520px}
+.mtm .up{color:var(--good);font-weight:600}.mtm .down{color:var(--crit);font-weight:600}
 .protlegend{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
 .protlegend div{display:flex;flex-direction:column;gap:4px}
 .iconbtn{border:0;background:var(--surface-2);color:var(--ink-2);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none}
@@ -310,7 +312,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 
 <footer class="wrap foot">
   <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
-  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.3</span></p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.4</span></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -390,6 +392,22 @@ const NIVEIS = {
 const prot = p => PROT[p.id] || {cong:p.inst,porte:"",nivel:2};
 const FGC_LIM = 250000, FGC_TETO = 1000000;
 function escudo(nivel, rotulo){ const n=NIVEIS[nivel]; return `<span class="shield ${n.cls}" title="${esc(n.txt)}"><span class="bars" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=nivel?"on":""}"></i>`).join("")}</span>${esc(rotulo||n.rot)}<span class="sr"> (proteção ${nivel} de 5)</span></span>`; }
+/* Venda antes do vencimento (marcação a mercado).
+   Prefixado e IPCA+ sem cupom: vendendo no mês m com a taxa de mercado r1, o valor é o da curva vezes ((1+r0)/(1+r1))^(anos que faltam).
+   O IR usa a mesma alíquota média da simulação, aplicada ao ganho de mercado. */
+function vendaMercado(p, f, m, dpp){
+  if (!p.venc || p.liq!=="mercado") return null;
+  const anos = (mesesAte(p.venc) - m)/12; if (anos <= 0) return null;
+  const r0 = rate(p)/100, r1 = r0 + dpp/100;
+  const bruto = f.bruto * Math.pow((1+r0)/(1+r1), anos);
+  const g0 = f.bruto - f.inv, aliqEf = g0>0 ? f.ir/g0 : aliq(m*30.4375);
+  return bruto - Math.max(bruto - f.inv, 0)*aliqEf;
+}
+function linhaMercado(p, f, m){
+  const sobe = vendaMercado(p,f,m,1); if (sobe==null) return "";
+  const cai = vendaMercado(p,f,m,-1), sobe2 = vendaMercado(p,f,m,2);
+  return `<div class="mtm"><b>Se vender em ${dataMes(m)}</b>: <span class="num">${brl(f.liq)}</span> se as taxas não mudarem · <span class="num up">${brl(cai)}</span> se caírem 1 p.p. · <span class="num down">${brl(sobe)}</span> se subirem 1 p.p. · <span class="num down">${brl(sobe2)}</span> se subirem 2 p.p.</div>`;
+}
 function avisoVenc(p, meses){
   if (!p.venc || !["mercado","venc"].includes(p.liq)) return "";
   const mv = mesesAte(p.venc), d = dBR(p.venc).slice(0,6)+new Date(p.venc+"T12:00:00").getFullYear();
@@ -880,7 +898,7 @@ function comparar(){
       <tbody id="cBody"></tbody>
     </table></div>
     <div class="protlegend">${[5,4,3,2,1,0].map(n=>`<div>${escudo(n)}<span class="tiny">${esc(NIVEIS[n].txt)}</span></div>`).join("")}</div>
-    <div class="callout small" id="cAvisoVenc"><b>Tesouro Prefixado, Tesouro IPCA+ e CDB de prazo:</b> o valor da tabela assume que a taxa contratada vale até o fim. Ela só é garantida no vencimento. Se você precisar do dinheiro antes, o Tesouro recompra o título pelo preço do dia, que pode ser menor que o projetado. No CDB de prazo da DM Financeira não existe resgate antes do vencimento.</div>
+    <div class="callout small" id="cAvisoVenc"><b>Tesouro Prefixado, Tesouro IPCA+ e CDB de prazo:</b> o valor da tabela assume que a taxa contratada vale até o fim. Ela só é garantida no vencimento. Se você precisar do dinheiro antes, o Tesouro recompra o título pelo preço do dia. A linha "Se vender em" estima esse preço: quando as taxas de mercado sobem, o título vale menos; quando caem, vale mais. Para comparação, logo após a eleição de 2026 os prefixados subiram mais de 2 p.p. em uma semana. No CDB de prazo da DM Financeira não existe resgate antes do vencimento.</div>
     <p class="tiny" style="margin:0">"Em dinheiro de hoje" divide o valor final pela inflação acumulada do cenário.</p>
   </div>
 </section>`;
@@ -940,7 +958,7 @@ function pintarComparador(){
   if (body){
     const atual = byId(perfil.reservaAtual);
     body.innerHTML = res.map((x,i)=>`<tr class="${x.p.id===foco.p.id?"hl":""}"><td class="num">${i+1}</td>
-      <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${atual&&x.p.id===atual.id?' <span class="chip accent">atual</span>':""}${avisoVenc(x.p,c.meses)?`<div style="margin-top:4px">${avisoVenc(x.p,c.meses)}</div>`:""}</td>
+      <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${atual&&x.p.id===atual.id?' <span class="chip accent">atual</span>':""}${avisoVenc(x.p,c.meses)?`<div style="margin-top:4px">${avisoVenc(x.p,c.meses)}</div>`:""}${linhaMercado(x.p,x.f,c.meses)}</td>
       <td>${protChip(x.p)}</td><td>${taxaTxt(x.p)}</td>
       <td class="r num">${brl(x.f.inv)}</td><td class="r num">${x.f.ir>0?"-"+brl(x.f.ir):"isento"}</td>
       <td class="r num"><b>${brl(x.f.liq)}</b></td><td class="r num">${brl(x.f.liq/def)}</td><td class="r num">${pct(x.aa)}</td></tr>`).join("");
@@ -1142,7 +1160,7 @@ function titulos(){
         <div><span>Ganho líquido</span><b style="color:var(--good)">${brl(x.fim.liq-valor)}</b></div>
         ${x.eqCDB?`<div><span>Equivale a CDB de</span><b>${fmtN(x.eqCDB,0)}% do CDI</b></div>`:`<div><span>Resgate</span><b>${o.tipo==="Tesouro"?"taxa garantida só no vencimento":"só no vencimento"}</b></div>`}
       </div>
-      ${o.tipo==="Tesouro"?`<div class="callout small">Dá para vender antes de ${dBR(x.p.venc)}, mas pelo preço do dia, que pode ser menor que o valor aplicado. O resultado acima só vale se você levar até o vencimento.</div>`:(o.gar!=="Tesouro"&&!o.prazoMeses&&o.tipo!=="LF"&&o.venc)?`<div class="tiny">Sem resgate antes de ${dBR(o.venc)}.</div>`:""}
+      ${o.tipo==="Tesouro"?`<div class="callout small">Dá para vender antes de ${dBR(x.p.venc)}, mas pelo preço do dia, que pode ser menor que o valor aplicado. O resultado acima só vale se você levar até o vencimento.</div>${(()=>{ const pm=Object.assign({},x.p,{liq:"mercado"}); const m=Math.min(12,x.meses-1); if(m<1) return ""; const f1=simular(pm,valor,0,m,sc)[m]; return linhaMercado(pm,f1,m); })()}`:(o.gar!=="Tesouro"&&!o.prazoMeses&&o.tipo!=="LF"&&o.venc)?`<div class="tiny">Sem resgate antes de ${dBR(o.venc)}.</div>`:""}
       ${o.obs?`<div class="tiny">${esc(o.obs)}</div>`:""}
       <div>${freshChip({fonte:x.p._fonte,data:x.p._data})} <span class="tiny">${esc(x.p._fonte)}</span></div>
     </div>`;}).join(""):`<div class="card"><p class="muted" style="margin:0">Nenhuma oferta com esses filtros.</p></div>`}
