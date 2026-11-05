@@ -1,6 +1,6 @@
 // Rede primeiro, cache como reserva: o painel sempre mostra a versão mais nova
 // quando há internet e continua abrindo sem internet.
-const VERSAO = "pp-v1";
+const VERSAO = "pp-v2";
 const BASE = ["./", "index.html", "manifest.webmanifest", "data/mercado.json",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 

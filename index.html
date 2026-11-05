@@ -249,7 +249,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 
 <footer class="wrap foot">
   <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
-  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v1.0</span></p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v1.1</span></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -284,7 +284,7 @@ const P = [
   {id:"mp",nome:"Cofrinho",inst:"Mercado Pago",tipo:"cdi",taxa:100,liq:"imediata",liqTxt:"Resgate imediato",gar:"Títulos públicos",ir:"reg",min:1,cond:"Sem FGC; lastro em títulos públicos",fonte:"Investilize",data:"2026-08-10"},
   {id:"bb",nome:"CDB Liquidez Diária",inst:"Banco do Brasil",tipo:"cdi",taxa:97,liq:"diaria",liqTxt:"Liquidez diária",gar:"FGC",ir:"reg",min:500,cond:"Mínimo de R$ 500",fonte:"InfinitePay",data:"2026-07-31"},
   {id:"tselic",nome:"Tesouro Selic 2031",inst:"Tesouro Direto",tipo:"selic",taxa:0.07,liq:"d1",liqTxt:"Resgate em 1 dia útil",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,isencao:10000,cond:"Custódia de 0,20% a.a. acima de R$ 10 mil",fonte:"estimativa",data:"2026-11-03"},
-  {id:"poup",nome:"Poupança",inst:"Qualquer banco",tipo:"poup",taxa:0,liq:"diaria",liqTxt:"Rende só no aniversário",gar:"FGC",ir:"isento",min:1,cond:"Isenta de IR",fonte:"regra oficial",data:"2026-11-05"},
+  {id:"poupbb",nome:"Poupança",inst:"Banco do Brasil",tipo:"poup",taxa:0,liq:"diaria",liqTxt:"Rende só no aniversário",gar:"FGC",ir:"isento",min:1,cond:"Isenta de IR. Rende uma vez por mês, na data de aniversário de cada depósito; resgatar antes perde o mês",fonte:"regra oficial",data:"2026-11-05"},
   {id:"dm",nome:"CDB pós 2031",inst:"DM Financeira (via Genial)",tipo:"cdi",taxa:121,liq:"venc",liqTxt:"Só no vencimento",gar:"FGC",ir:"reg",min:1000,venc:"2031-11-04",cond:"Sem resgate antes de 04/11/2031",fonte:"Meelion",data:"2026-11-05"},
   {id:"pre29",nome:"Tesouro Prefixado 2029",inst:"Tesouro Direto",tipo:"pre",taxa:15.19,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2029-01-01",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
   {id:"pre32",nome:"Tesouro Prefixado 2032",inst:"Tesouro Direto",tipo:"pre",taxa:15.63,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-01-01",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
@@ -301,8 +301,8 @@ const IOF = [96,93,90,86,83,80,76,73,70,66,63,60,56,53,50,46,43,40,36,33,30,26,2
 
 /* ===================== ESTADO ===================== */
 const DEF_PERFIL = {
-  reservaValor:30000, reservaAtual:"bb", custoMensal:null, mesesMeta:6,
-  comp:{inicial:30000,mensal:0,meses:24,cen:"focus",filtro:"todos"},
+  v:2, reservaValor:30000, reservaMensal:500, reservaAtual:"poupbb", resHoriz:12, resCen:"focus", custoMensal:null, mesesMeta:6,
+  comp:{inicial:30000,mensal:500,meses:24,cen:"focus",filtro:"todos"},
   meta:{alvo:100000,inicial:30000,mensal:500,produto:"bv",cen:"focus"},
   renda:{patrimonio:100000,produto:"ipca40"},
   posicoes:[],
@@ -325,11 +325,12 @@ function prodInfo(p){ // taxa, fonte e data efetivas
   const ov = perfil.overrides && perfil.overrides[p.id];
   if (ov!=null && ov!=="") return {taxa:+ov, fonte:"ajuste seu", data:null, manual:true};
   if (r && r.taxa!=null) return {taxa:+r.taxa, fonte:r.fonte||p.fonte, data:r.data||p.data};
+  if (p.fonte==="regra oficial") return {taxa:p.taxa, fonte:"Regra oficial + TR do Banco Central", data:(M().atualizadoEm||"").slice(0,10)||p.data};
   return {taxa:p.taxa, fonte:p.fonte, data:p.data};
 }
 const rate = p => prodInfo(p).taxa;
 const byId = id => P.find(p=>p.id===id);
-const rotulo = p => (p.inst==="Tesouro Direto"||p.id==="poup") ? p.nome : p.inst;
+const rotulo = p => p.tipo==="poup" ? "Poupança BB" : p.inst==="Tesouro Direto" ? p.nome : p.inst;
 
 /* ===================== FORMATAÇÃO ===================== */
 const brl = (v,d=0) => (isFinite(v)?v:0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:d,maximumFractionDigits:d});
@@ -409,6 +410,10 @@ function normalizar(o){
   for (const k of ["comp","meta","renda"]) p[k] = Object.assign(clone(DEF_PERFIL[k]), (o||{})[k]||{});
   if (!Array.isArray(p.posicoes)) p.posicoes = [];
   p.overrides = p.overrides||{}; p.mkOverrides = p.mkOverrides||{};
+  if (!o || !o.v){ if (p.reservaAtual==="bb") p.reservaAtual="poupbb"; }
+  if (p.reservaAtual==="poup" || !byId(p.reservaAtual)) p.reservaAtual="poupbb";
+  p.posicoes.forEach(x=>{ if (x.produto==="poup") x.produto="poupbb"; });
+  p.v = 2;
   return p;
 }
 function carregarLocal(){ try{ const s=localStorage.getItem("pp-perfil"); if(s) perfil=normalizar(JSON.parse(s)); }catch(e){} }
@@ -451,14 +456,17 @@ function render(){
 window.addEventListener("hashchange", ()=>{ render(); window.scrollTo(0,0); });
 
 function liquidos(){ return P.filter(p=>["diaria","imediata","d1"].includes(p.liq)); }
-function rankReserva(valor, sc="estavel"){
-  return liquidos().map(p=>({p, info:prodInfo(p), g:liq12(p,valor,sc)})).sort((a,b)=>b.g-a.g);
+function rankReserva(valor, mensal, meses, sc){
+  return liquidos().map(p=>{ const s=simular(p,valor,mensal,meses,sc); const f=s[meses]; return {p, info:prodInfo(p), s, f, g:f.liq-f.inv}; }).sort((a,b)=>b.f.liq-a.f.liq);
 }
+const HORIZ = [[6,"6 meses"],[12,"1 ano"],[24,"2 anos"],[36,"3 anos"],[60,"5 anos"]];
+const horizTxt = m => (HORIZ.find(h=>h[0]===m)||[0,m+" meses"])[1];
 
 function painel(){
-  const mk = M(); const val = perfil.reservaValor||0; const atual = byId(perfil.reservaAtual)||byId("bb");
-  const rk = rankReserva(val); const best = rk[0]; const gAtual = liq12(atual,val,"estavel");
-  const perda = best.g - gAtual;
+  const mk = M(); const val = perfil.reservaValor||0; const atual = byId(perfil.reservaAtual)||byId("poupbb");
+  const men = perfil.reservaMensal||0;
+  const rk = rankReserva(val, men, 12, perfil.resCen||"focus"); const best = rk[0]; const cur = rk.find(x=>x.p.id===atual.id);
+  const gAtual = cur.g; const perda = best.g - gAtual;
   const real = ((1+mk.cdi/100)/(1+mk.focusIpca/100)-1)*100;
   const tags = {juros:"Juros",risco:"Risco",acao:"Ação",agenda:"Agenda"};
   return `<section class="view">
@@ -470,12 +478,12 @@ function painel(){
     <div>
       <div class="eyebrow">Reserva de emergência</div>
       <div class="big num">${brl(val)}</div>
-      <p>${perda>1?`Hoje em ${esc(atual.inst)} (${taxaTxt(atual)}), ela rende <b class="num">${brl(gAtual)}</b> líquidos por ano. Em ${esc(best.p.inst)} renderia <b class="num">${brl(best.g)}</b>, mantendo FGC e resgate diário.`:`Sua reserva já está na opção de maior rendimento entre as de liquidez diária.`}</p>
+      <p>${men>0?`Com aportes de <b class="num">${brl(men)}</b> por mês, em 12 meses ela chega a <b class="num">${brl(cur.f.liq)}</b> na ${esc(rotulo(atual))}.`:`Em 12 meses ela chega a <b class="num">${brl(cur.f.liq)}</b> na ${esc(rotulo(atual))}.`} ${perda>1?`Em ${esc(rotulo(best.p))} chegaria a <b class="num">${brl(best.f.liq)}</b>, com FGC e resgate diário.`:`Você já está na opção de maior rendimento.`}</p>
       <a class="cta" href="#reserva">Ver plano da reserva →</a>
     </div>
     <div class="side">
-      <div class="kv"><span>Rende hoje (12 meses)</span><b class="num">${brl(gAtual)}</b></div>
-      <div class="kv"><span>Melhor opção</span><b class="num up">${brl(best.g)}</b></div>
+      <div class="kv"><span>Juros em 12 meses hoje</span><b class="num">${brl(gAtual)}</b></div>
+      <div class="kv"><span>Juros na melhor opção</span><b class="num up">${brl(best.g)}</b></div>
       <div class="kv"><span>Diferença por ano</span><b class="num up">+${brl(Math.max(perda,0))}</b></div>
       <div class="kv"><span>Diferença por mês</span><b class="num up">+${brl(Math.max(perda,0)/12)}</b></div>
     </div>
@@ -499,7 +507,7 @@ function painel(){
     </div>
     <div class="card stack">
       <h3>Onde cada dinheiro deve ficar</h3>
-      <div class="callout info"><b>Reserva de emergência</b><br>Pós-fixado com liquidez diária e FGC. Hoje o melhor é <b>${esc(best.p.inst)}</b> a ${taxaTxt(best.p)}.</div>
+      <div class="callout info"><b>Reserva de emergência</b><br>Pós-fixado com liquidez diária e FGC. Hoje o melhor é <b>${esc(rotulo(best.p))}</b> a ${taxaTxt(best.p)}. A Poupança do BB rende ${pct(annual(byId("poupbb"),0,"estavel"))} ao ano, isenta.</div>
       <div class="callout"><b>Dinheiro para depois de 2029</b><br>Tesouro Prefixado 2029 a ${pct(rate(byId("pre29")))} ou IPCA+ 2032 a IPCA + ${pct(rate(byId("ipca32")))}, comprados aos poucos e levados até o vencimento.</div>
       <a class="btn ghost" href="#comparar" style="text-align:center;text-decoration:none">Comparar todos os produtos</a>
     </div>
@@ -513,36 +521,75 @@ function painel(){
 function instalado(){ try{ return window.navigator.standalone===true || window.matchMedia("(display-mode: standalone)").matches; }catch(e){ return false; } }
 
 function reserva(){
-  const val = perfil.reservaValor||0, atual = byId(perfil.reservaAtual)||byId("bb");
-  const rk = rankReserva(val); const gAtual = liq12(atual,val,"estavel");
+  const val = perfil.reservaValor||0, men = perfil.reservaMensal||0, atual = byId(perfil.reservaAtual)||byId("poupbb");
+  const h = perfil.resHoriz||12, sc = perfil.resCen||"focus";
+  const rk = rankReserva(val, men, h, sc); const cur = rk.find(x=>x.p.id===atual.id); const best = rk[0];
   const custo = perfil.custoMensal, meta = custo ? custo*(perfil.mesesMeta||6) : null;
-  const cob = custo ? val/custo : null; const best = rk[0];
+  const cob = custo ? val/custo : null;
+  let mesMeta = null;
+  if (meta && val<meta && men>0){ const s=simular(best.p,val,men,240,sc); const i=s.findIndex(x=>x.liq>=meta); mesMeta = i>=0?i:null; }
+  const top = rk.filter(x=>x.p.id!==atual.id).slice(0,3);
+  const cols = [cur, ...top];
+  const proj = HORIZ.map(([m,l])=>({m,l,inv:val+men*m, vals:cols.map(c=>simular(c.p,val,men,m,sc)[m].liq)}));
   return `<section class="view">
   <div><div class="eyebrow">Reserva de emergência</div><h2 class="title">Segurança primeiro, rendimento em seguida</h2>
-  <p class="lede">Só entram aqui produtos com garantia e resgate em até um dia útil. O ranking usa o CDI de hoje por 12 meses e o IR de 17,5%.</p></div>
-  <div class="card">
+  <p class="lede">Só entram aqui produtos com garantia e resgate em até um dia útil. A projeção soma o valor atual, os aportes mensais, o IR de cada aporte e o caminho da Selic no cenário escolhido.</p></div>
+  <div class="card stack">
     <div class="row">
-      <div class="field"><label for="rVal">Valor da reserva</label><div class="input"><span>R$</span><input id="rVal" type="number" min="0" step="500" value="${val}"></div></div>
-      <div class="field"><label for="rAtual">Onde está hoje</label><div class="input"><select id="rAtual">${liquidos().map(p=>`<option value="${p.id}" ${p.id===atual.id?"selected":""}>${esc(p.inst)} · ${taxaTxt(p)}</option>`).join("")}</select></div></div>
+      <div class="field"><label for="rVal">Valor atual</label><div class="input"><span>R$</span><input id="rVal" type="number" min="0" step="500" value="${val}"></div></div>
+      <div class="field"><label for="rMen">Aporte mensal</label><div class="input"><span>R$</span><input id="rMen" type="number" min="0" step="100" value="${men}"></div></div>
+      <div class="field" style="flex:2 1 220px"><label for="rAtual">Onde está hoje</label><div class="input"><select id="rAtual">${liquidos().map(p=>`<option value="${p.id}" ${p.id===atual.id?"selected":""}>${esc(rotulo(p))}${p.tipo==="poup"?"":" · "+esc(p.nome)} · ${taxaTxt(p)}</option>`).join("")}</select></div></div>
+    </div>
+    <div class="row">
+      <div class="field" style="flex:2 1 300px"><label>Prazo da projeção</label><div class="seg" id="rHor">${HORIZ.map(([m,l])=>`<button type="button" data-v="${m}" aria-pressed="${m===h}">${l}</button>`).join("")}</div></div>
+      <div class="field" style="flex:2 1 300px"><label>Cenário de juros</label><div class="seg" id="rCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===sc}">${v.nome}</button>`).join("")}</div></div>
+    </div>
+    <div class="row">
       <div class="field"><label for="rCusto">Custo mensal da casa</label><div class="input"><span>R$</span><input id="rCusto" type="number" min="0" step="100" value="${custo??""}" placeholder="Informe"></div></div>
       <div class="field"><label for="rMeses">Meses de cobertura</label><div class="input"><select id="rMeses">${[3,6,9,12].map(n=>`<option ${n===perfil.mesesMeta?"selected":""} value="${n}">${n} meses</option>`).join("")}</select></div></div>
     </div>
-    ${meta?`<div class="stack" style="margin-top:16px">
+    ${meta?`<div class="stack">
       <div class="row" style="justify-content:space-between;align-items:baseline"><b>${cob>=perfil.mesesMeta?"Meta atingida":"Progresso da meta"}</b><span class="num small">${brl(val)} de ${brl(meta)}</span></div>
       <div class="progress" role="progressbar" aria-valuenow="${Math.round(Math.min(val/meta,1)*100)}" aria-valuemin="0" aria-valuemax="100"><div style="width:${Math.min(val/meta,1)*100}%"></div></div>
-      <div class="small muted">Cobre <b class="num">${fmtN(cob,1)} meses</b> de despesas. ${cob>=perfil.mesesMeta?`Sobra de ${brl(val-meta)} pode ir para o longo prazo.`:`Faltam ${brl(meta-val)} para ${perfil.mesesMeta} meses.`}</div>
-    </div>`:`<p class="small muted" style="margin:14px 0 0">Informe o custo mensal da casa para ver quantos meses a reserva cobre.</p>`}
+      <div class="small muted">Cobre <b class="num">${fmtN(cob,1)} meses</b> de despesas. ${cob>=perfil.mesesMeta?`Os aportes daqui em diante podem ir para objetivos de longo prazo.`:mesMeta!=null?`Com ${brl(men)} por mês em ${esc(rotulo(best.p))}, a meta de ${perfil.mesesMeta} meses é atingida em <b>${mesMeta} meses</b>.`:`Faltam ${brl(meta-val)} para ${perfil.mesesMeta} meses.`}</div>
+    </div>`:`<p class="small muted" style="margin:0">Informe o custo mensal da casa para ver quantos meses a reserva cobre e quando a meta é atingida.</p>`}
   </div>
+
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Em ${horizTxt(h)} · aportando ${brl(men)} por mês</div>
+      <div class="big num">+${brl(Math.max(best.f.liq-cur.f.liq,0))}</div>
+      <p>${best.p.id===atual.id?`Você já está na opção de maior rendimento.`:`É quanto você teria a mais em ${esc(rotulo(best.p))} do que deixando na ${esc(rotulo(atual))}, com a mesma garantia e resgate em até um dia útil.`}</p>
+    </div>
+    <div class="side">
+      <div class="kv"><span>Você aporta</span><b class="num">${brl(cur.f.inv)}</b></div>
+      <div class="kv"><span>${esc(rotulo(atual))}</span><b class="num">${brl(cur.f.liq)}</b></div>
+      <div class="kv"><span>${esc(rotulo(best.p))}</span><b class="num up">${brl(best.f.liq)}</b></div>
+      <div class="kv"><span>Juros a mais</span><b class="num up">${cur.g>0?"+"+pct((best.g/cur.g-1)*100,0):"—"}</b></div>
+    </div>
+  </div>
+
+  <div class="card stack">
+    <div class="row" style="justify-content:space-between;align-items:center"><h3>Projeção: onde está hoje x melhores opções</h3><span class="tiny">patrimônio líquido de IR</span></div>
+    <div class="legend">${cols.map((c,i)=>`<span class="chip neutral"><i style="width:9px;height:9px;border-radius:99px;display:inline-block;background:var(${i===0?"--c7":COLORS[i-1]})"></i>${esc(rotulo(c.p))}${i===0?" (atual)":""}</span>`).join("")}</div>
+    <div class="chartbox" style="height:280px"><canvas id="rChart" aria-label="Projeção da reserva por instituição"></canvas></div>
+    <div class="tablewrap"><table style="min-width:620px">
+      <thead><tr><th>Prazo</th><th class="r">Você aporta</th>${cols.map((c,i)=>`<th class="r">${esc(rotulo(c.p))}${i===0?" (atual)":""}</th>`).join("")}<th class="r">A mais no melhor</th></tr></thead>
+      <tbody>${proj.map(r=>{ const mx=Math.max(...r.vals); return `<tr class="${r.m===h?"hl":""}"><td><b>${r.l}</b></td><td class="r num">${brl(r.inv)}</td>${r.vals.map(v=>`<td class="r num">${v===mx?"<b>"+brl(v)+"</b>":brl(v)}</td>`).join("")}<td class="r num" style="color:var(--good)">+${brl(mx-r.vals[0])}</td></tr>`;}).join("")}</tbody>
+    </table></div>
+    <p class="tiny" style="margin:0">Cenário: ${esc(SCEN[sc].nome)}, ${esc(SCEN[sc].desc.toLowerCase())}. A poupança segue a regra oficial: 0,5% ao mês mais TR enquanto a Selic estiver acima de 8,5%.</p>
+  </div>
+
   <div class="grid2">
     <div class="card stack">
-      <div class="row" style="justify-content:space-between;align-items:center"><h3>Ranking para ${brl(val)}</h3><span class="tiny">líquido em 12 meses</span></div>
+      <div class="row" style="justify-content:space-between;align-items:center"><h3>Ranking em ${horizTxt(h)}</h3><span class="tiny">patrimônio final líquido</span></div>
       <div class="rank">
-      ${rk.map((x,i)=>{ const d=x.g-gAtual; const cur=x.p.id===atual.id; return `<div class="ritem ${i===0?"top":""} ${cur?"cur":""}">
+      ${rk.map((x,i)=>{ const d=x.f.liq-cur.f.liq; const ehAtual=x.p.id===atual.id; return `<div class="ritem ${i===0?"top":""} ${ehAtual?"cur":""}">
         <div class="pos">${i+1}</div>
-        <div style="min-width:0"><div class="nm">${esc(x.p.inst)} <span class="muted" style="font-weight:500">· ${esc(x.p.nome)}</span></div>
-          <div class="meta"><span class="chip neutral">${taxaTxt(x.p)}</span><span class="chip neutral">${esc(x.p.liqTxt)}</span>${x.p.gar!=="FGC"?`<span class="chip neutral">${esc(x.p.gar)}</span>`:""}${freshChip(x.info)}${cur?'<span class="chip accent">Onde está hoje</span>':""}</div>
+        <div style="min-width:0"><div class="nm">${esc(rotulo(x.p))} <span class="muted" style="font-weight:500">· ${esc(x.p.nome)}</span></div>
+          <div class="meta"><span class="chip neutral">${taxaTxt(x.p)}</span><span class="chip neutral">${esc(x.p.liqTxt)}</span>${x.p.gar!=="FGC"?`<span class="chip neutral">${esc(x.p.gar)}</span>`:""}${freshChip(x.info)}${ehAtual?'<span class="chip accent">Onde está hoje</span>':""}</div>
           ${x.p.cond?`<div class="tiny" style="margin-top:4px">${esc(x.p.cond)}</div>`:""}</div>
-        <div class="val"><b>${brl(x.g)}</b><small class="${d>0?"delta up":d<0?"delta down":""}">${cur?"atual":(d>=0?"+":"")+brl(d)}</small></div>
+        <div class="val"><b>${brl(x.f.liq)}</b><small class="${d>0?"delta up":d<0?"delta down":""}">${ehAtual?"atual":(d>=0?"+":"")+brl(d)}</small></div>
       </div>`;}).join("")}
       </div>
     </div>
@@ -553,17 +600,18 @@ function reserva(){
         <ol class="steps small">
           <li>Abra a conta em <b>${esc(best.p.inst)}</b> pelo app oficial. ${best.p.cond?esc(best.p.cond)+".":""}</li>
           <li>No app, confira se o produto está marcado como <b>liquidez diária</b> e se a taxa é ${taxaTxt(best.p)}.</li>
-          <li>Resgate a reserva em ${esc(atual.inst)} e transfira por Pix para a sua conta em ${esc(best.p.inst)}.</li>
-          <li>Aplique tudo de uma vez e só resgate em emergência. Antes de 30 dias há IOF sobre o rendimento.</li>
+          ${atual.tipo==="poup"?`<li>Na poupança, o rendimento cai uma vez por mês, no aniversário de cada depósito. Resgate no dia do aniversário (ou logo depois) para não perder o mês corrente.</li>`:""}
+          <li>Transfira por Pix do BB para a sua conta em ${esc(best.p.inst)} e aplique tudo no CDB.</li>
+          ${men>0?`<li>Programe um Pix mensal de ${brl(men)} para ${esc(best.p.inst)} logo após o salário e aplique no mesmo CDB. Cada aporte tem seu próprio prazo de IR.</li>`:""}
+          <li>Só resgate em emergência. Antes de 30 dias há IOF sobre o rendimento.</li>
         </ol>`}
-        <div class="callout small">Diferença de ${brl(best.g-gAtual)} por ano, ou ${brl((best.g-gAtual)/12)} por mês, sem perder garantia nem liquidez.</div>
       </div>
       <div class="card stack">
-        <h3>Regras da reserva</h3>
+        <h3>Poupança x CDB, na prática</h3>
         <ul class="steps small">
-          <li>FGC cobre até R$ 250 mil por CPF em cada instituição.</li>
-          <li>Prefixado e IPCA+ ficam fora: oscilam de preço e podem dar prejuízo no resgate antecipado.</li>
-          <li>Taxas promocionais de 130% ou mais costumam durar poucos dias e ter teto baixo.</li>
+          <li>A poupança é isenta de IR, mas rende ${pct(annual(byId("poupbb"),0,"estavel"))} ao ano. Um CDB de ${fmtN(rate(byId("bv")),0)}% do CDI rende ${pct(annual(byId("bv"),0,"estavel"))} bruto e, mesmo pagando IR, entrega mais.</li>
+          <li>Na poupança, quem saca antes do aniversário perde o rendimento do mês. No CDB o rendimento é diário.</li>
+          <li>Os dois têm a mesma garantia do FGC, até R$ 250 mil por CPF em cada instituição.</li>
         </ul>
       </div>
     </div>
@@ -578,7 +626,7 @@ function comparar(){
   const res = lista.map(p=>{ const s=simular(p,c.inicial,c.mensal,c.meses,c.cen); const f=s[c.meses]; return {p,s,f,aa:f.inv>0?(Math.pow(f.liq/f.inv,12/c.meses)-1)*100:0}; }).sort((a,b)=>b.f.liq-a.f.liq);
   if (!c.vis) c.vis = res.slice(0,5).map(x=>x.p.id);
   const vis = res.filter(x=>c.vis.includes(x.p.id));
-  const atual = byId(perfil.reservaAtual)||byId("bb");
+  const atual = byId(perfil.reservaAtual)||byId("poupbb");
   const sc = SCEN[c.cen];
   return `<section class="view">
   <div><div class="eyebrow">Comparador</div><h2 class="title">${P.length} produtos, três cenários de juros</h2>
@@ -732,7 +780,7 @@ function carteira(){
       </div>
       ${a.dias<30?`<div class="tiny">IOF zera em ${30-a.dias} dias. A alíquota de IR cai para 20% após 180 dias.</div>`:a.p.ir==="reg"&&a.dias<=720?`<div class="tiny">IR cai para ${pct((a.dias<=180?.20:a.dias<=360?.175:.15)*100,1)} em ${(a.dias<=180?181:a.dias<=360?361:721)-a.dias} dias.</div>`:""}
     </div>`).join(""):`<div class="stack"><p class="muted" style="margin:0">Nenhuma aplicação cadastrada. Comece pela reserva de emergência ou use o formulário abaixo.</p>
-      <div><button class="btn" id="addReserva" type="button">Cadastrar reserva de ${brl(perfil.reservaValor||0)} em ${esc((byId(perfil.reservaAtual)||byId("bb")).inst)}</button></div></div>`}
+      <div><button class="btn" id="addReserva" type="button">Cadastrar reserva de ${brl(perfil.reservaValor||0)} em ${esc(rotulo(byId(perfil.reservaAtual)||byId("poupbb")))}</button></div></div>`}
     </div>
   </div>
   <div class="card stack">
@@ -789,9 +837,13 @@ function softRender(){ clearTimeout(inputTimer); inputTimer=setTimeout(()=>{rend
 function bind(r){
   if (r==="reserva"){
     on("rVal","input",e=>{perfil.reservaValor=num(e.target.value);softRender();});
+    on("rMen","input",e=>{perfil.reservaMensal=num(e.target.value);softRender();});
     on("rAtual","change",e=>{perfil.reservaAtual=e.target.value;render();salvar();});
     on("rCusto","input",e=>{perfil.custoMensal=e.target.value?num(e.target.value):null;softRender();});
     on("rMeses","change",e=>{perfil.mesesMeta=+e.target.value;render();salvar();});
+    document.querySelectorAll("#rHor button").forEach(b=>b.addEventListener("click",()=>{perfil.resHoriz=+b.dataset.v;render();salvar();}));
+    document.querySelectorAll("#rCen button").forEach(b=>b.addEventListener("click",()=>{perfil.resCen=b.dataset.v;render();salvar();}));
+    desenharReserva();
   }
   if (r==="comparar"){
     const c=perfil.comp;
@@ -859,6 +911,17 @@ function desenharComparador(){
   const ds=res.map((x,i)=>({x,i})).filter(o=>c.vis.includes(o.x.p.id)).map(o=>({label:rotulo(o.x.p),data:idx.map(m=>o.x.s[m].liq),borderColor:cssv(COLORS[o.i%COLORS.length]),backgroundColor:cssv(COLORS[o.i%COLORS.length]),borderWidth:o.i===0?3:2,pointRadius:0,tension:.2}));
   ds.push({label:"Total aportado",data:idx.map(m=>res[0]?res[0].s[m].inv:0),borderColor:cssv("--ink-3"),borderDash:[5,5],borderWidth:1.5,pointRadius:0});
   charts.c=new Chart(el,{type:"line",data:{labels:idx,datasets:ds},options:baseOpts()});
+}
+function desenharReserva(){
+  if (!window.Chart) return;
+  const el=document.getElementById("rChart"); if(!el) return;
+  const val=perfil.reservaValor||0, men=perfil.reservaMensal||0, h=Math.max(perfil.resHoriz||12,12), sc=perfil.resCen||"focus";
+  const atual=byId(perfil.reservaAtual)||byId("poupbb");
+  const rk=rankReserva(val,men,h,sc); const cur=rk.find(x=>x.p.id===atual.id); const cols=[cur,...rk.filter(x=>x.p.id!==atual.id).slice(0,3)];
+  const step=h>36?2:1; const idx=[]; for(let m=0;m<=h;m+=step) idx.push(m); if(idx[idx.length-1]!==h) idx.push(h);
+  const ds=cols.map((c,i)=>({label:rotulo(c.p),data:idx.map(m=>c.s[m].liq),borderColor:cssv(i===0?"--c7":COLORS[i-1]),backgroundColor:cssv(i===0?"--c7":COLORS[i-1]),borderWidth:i===1?3:2,borderDash:i===0?[6,4]:undefined,pointRadius:0,tension:.2}));
+  ds.push({label:"Você aporta",data:idx.map(m=>val+men*m),borderColor:cssv("--line"),borderWidth:1.5,pointRadius:0});
+  charts.r=new Chart(el,{type:"line",data:{labels:idx,datasets:ds},options:baseOpts()});
 }
 function desenharMeta(){
   if (!window.Chart) return;
