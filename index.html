@@ -209,6 +209,57 @@ tr.hl td{background:color-mix(in srgb,var(--accent-soft) 50%,transparent)}
 footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top:1px solid var(--line)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 [hidden]{display:none!important}
+/* Comparador: chaves, régua de prazo, indicadores */
+.switches{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.switch{position:relative;display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:12px 14px;border-radius:12px;background:var(--surface-2)}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .sw-ui{flex:none;width:40px;height:24px;border-radius:99px;background:var(--line);position:relative;transition:background .2s;margin-top:1px}
+.switch .sw-ui::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .22s cubic-bezier(.3,1.4,.5,1)}
+.switch input:checked + .sw-ui{background:var(--accent)}
+.switch input:checked + .sw-ui::after{transform:translateX(16px)}
+.switch input:focus-visible + .sw-ui{outline:2px solid var(--accent);outline-offset:2px}
+.switch b{display:block;font-size:14px}
+.switch .tiny{display:block;margin-top:2px}
+.prazo{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:14px;background:var(--surface-2)}
+.prazo-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.prazo-val{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,5vw,34px);letter-spacing:-.02em;line-height:1.1}
+.stepper{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.stepper button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink);font-family:var(--f-num);transition:transform .1s,background .15s}
+.stepper button:hover{background:var(--accent-soft)}
+.stepper button:active{transform:scale(.92)}
+.stepper-n{background:var(--surface);width:124px;flex:none}
+@media (max-width:480px){.stepper{gap:4px}.stepper button{padding:8px 8px}.stepper-n{width:96px}.stepper-n span{display:none}}
+.range-wrap{position:relative;padding-top:32px;padding-bottom:20px}
+.range{-webkit-appearance:none;appearance:none;display:block;width:100%;height:10px;border-radius:99px;background:linear-gradient(90deg,var(--accent) var(--p,0%),var(--line) var(--p,0%));outline:none;margin:0;cursor:pointer}
+.range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--surface);border:3px solid var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.25);cursor:grab;transition:transform .15s}
+.range:active::-webkit-slider-thumb{transform:scale(1.18);cursor:grabbing}
+.range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.25);cursor:grab}
+.range:focus-visible::-webkit-slider-thumb{outline:3px solid var(--accent-soft)}
+.bubble{position:absolute;top:0;transform:translateX(-50%);background:var(--ink);color:var(--surface);font-family:var(--f-num);font-size:12px;font-weight:600;padding:3px 9px;border-radius:8px;white-space:nowrap;pointer-events:none}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:var(--ink);transform:translateX(-50%) rotate(45deg)}
+.ticks{position:absolute;left:13px;right:13px;bottom:0;height:14px}
+.ticks span{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--ink-3);font-family:var(--f-num)}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+.presets button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-2);transition:background .15s,color .15s,transform .1s}
+.presets button:active{transform:scale(.95)}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.kpibar{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.kpix{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-width:0;box-shadow:var(--shadow)}
+.kpix span{font-size:12px;font-weight:700;color:var(--ink-2)}
+.kpix b{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
+.kpix small{font-size:12px;color:var(--ink-3);line-height:1.35}
+.kpix:nth-child(2) b{color:var(--accent)}
+.kpix:nth-child(5) b{color:var(--gold);font-family:var(--f-body);font-weight:700}
+.chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start}
+.chartbox.big{height:340px}
+@media (min-width:700px){.chartbox.big{height:450px}}
+.pick{flex:3 1 300px;min-width:0}
+.pick summary{cursor:pointer;font-size:13px;color:var(--ink-2);padding:8px 0;list-style:revert}
+.pick[open] summary{margin-bottom:6px}
+.leitura{background:var(--surface-2);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.6;max-width:none}
+.leitura p{margin:0 0 6px}
+.leitura p:last-child{margin:0}
+
 .shield{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:3px 9px 3px 7px;border-radius:999px;white-space:nowrap}
 .shield.good{background:var(--good-soft);color:var(--good)} .shield.accent{background:var(--accent-soft);color:var(--accent)}
 .shield.warn{background:var(--warn-soft);color:var(--warn)} .shield.crit{background:var(--crit-soft);color:var(--crit)}
@@ -258,7 +309,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 
 <footer class="wrap foot">
   <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
-  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v1.3</span></p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.0</span></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -343,8 +394,8 @@ const IOF = [96,93,90,86,83,80,76,73,70,66,63,60,56,53,50,46,43,40,36,33,30,26,2
 
 /* ===================== ESTADO ===================== */
 const DEF_PERFIL = {
-  v:2, reservaValor:30000, reservaMensal:500, reservaAtual:"poupbb", resHoriz:12, resCen:"focus", protPct:30, protProd:"tselic", titFiltro:"regra", titTipo:"todos", titValor:10000, custoMensal:null, mesesMeta:6,
-  comp:{inicial:30000,mensal:500,meses:24,cen:"focus",filtro:"todos"},
+  v:2, corrigir:true, reservaValor:30000, reservaMensal:500, reservaAtual:"poupbb", resHoriz:12, resCen:"focus", protPct:30, protProd:"tselic", titFiltro:"regra", titTipo:"todos", titValor:10000, custoMensal:null, mesesMeta:6,
+  comp:{inicial:30000,mensal:500,meses:24,cen:"focus",filtro:"todos",real:false,modo:"comparar",foco:null,ordem:"rendimento"},
   meta:{alvo:100000,inicial:30000,mensal:500,produto:"bv",cen:"focus"},
   renda:{patrimonio:100000,produto:"ipca40"},
   posicoes:[],
@@ -419,7 +470,14 @@ function annual(p, m, sc){
   }
   return 0;
 }
-function simular(p, inicial, mensal, meses, sc){
+const MESES_TXT=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const ipcaCen = sc => (SCEN[sc]||SCEN.estavel).ipca;
+const deflator = (m,sc) => Math.pow(1+ipcaCen(sc)/100, m/12);
+function dataMes(m){ const d=new Date(D0.getTime()); d.setDate(1); d.setMonth(d.getMonth()+m); return MESES_TXT[d.getMonth()]+"/"+d.getFullYear(); }
+function duracaoTxt(m){ const a=Math.floor(m/12), r=m%12; return [a?a+(a>1?" anos":" ano"):"", r?r+(r>1?" meses":" mês"):""].filter(Boolean).join(" e ")||"0 meses"; }
+function aporteNoMes(mensal, m, sc, corrigir){ return corrigir ? mensal*Math.pow(1+ipcaCen(sc)/100, Math.floor((m-1)/12)) : mensal; }
+function simular(p, inicial, mensal, meses, sc, corrigir){
+  if (corrigir===undefined) corrigir = perfil.corrigir!==false;
   const coh = inicial>0 ? [{pr:inicial,v:inicial,m:0}] : [];
   const out = [];
   const foto = m => {
@@ -438,7 +496,7 @@ function simular(p, inicial, mensal, meses, sc){
       const fee = Math.max(0,tot-(p.isencao||0))*p.custodia/100/12;
       if (tot>0){ const f=1-fee/tot; for (const c of coh) c.v*=f; }
     }
-    if (mensal>0) coh.push({pr:mensal,v:mensal,m});
+    if (mensal>0){ const a=aporteNoMes(mensal,m,sc,corrigir); coh.push({pr:a,v:a,m}); }
     foto(m);
   }
   return out;
@@ -583,7 +641,7 @@ function reserva(){
   if (meta && val<meta && men>0){ const s=simular(best.p,val,men,240,sc); const i=s.findIndex(x=>x.liq>=meta); mesMeta = i>=0?i:null; }
   const top = rk.filter(x=>x.p.id!==atual.id).slice(0,3);
   const cols = [cur, ...top];
-  const proj = HORIZ.map(([m,l])=>({m,l,inv:val+men*m, vals:cols.map(c=>simular(c.p,val,men,m,sc)[m].liq)}));
+  const proj = HORIZ.map(([m,l])=>{ const ss=cols.map(c=>simular(c.p,val,men,m,sc)[m]); return {m,l,inv:ss[0].inv, vals:ss.map(x=>x.liq)}; });
   return `<section class="view">
   <div><div class="eyebrow">Reserva de emergência</div><h2 class="title">Segurança primeiro, rendimento em seguida</h2>
   <p class="lede">Só entram aqui produtos com garantia e resgate em até um dia útil. A projeção soma o valor atual, os aportes mensais, o IR de cada aporte e o caminho da Selic no cenário escolhido.</p></div>
@@ -630,7 +688,7 @@ function reserva(){
       <thead><tr><th>Prazo</th><th class="r">Você aporta</th>${cols.map((c,i)=>`<th class="r">${esc(rotulo(c.p))}${i===0?" (atual)":""}</th>`).join("")}<th class="r">A mais no melhor</th></tr></thead>
       <tbody>${proj.map(r=>{ const mx=Math.max(...r.vals); return `<tr class="${r.m===h?"hl":""}"><td><b>${r.l}</b></td><td class="r num">${brl(r.inv)}</td>${r.vals.map(v=>`<td class="r num">${v===mx?"<b>"+brl(v)+"</b>":brl(v)}</td>`).join("")}<td class="r num" style="color:var(--good)">+${brl(mx-r.vals[0])}</td></tr>`;}).join("")}</tbody>
     </table></div>
-    <p class="tiny" style="margin:0">Cenário: ${esc(SCEN[sc].nome)}, ${esc(SCEN[sc].desc.toLowerCase())}. A poupança segue a regra oficial: 0,5% ao mês mais TR enquanto a Selic estiver acima de 8,5%.</p>
+    <p class="tiny" style="margin:0">${perfil.corrigir!==false&&men>0?`Aporte reajustado pela inflação de ${pct(ipcaCen(sc),1)} a cada 12 meses (${brl(men)} hoje, ${brl(aporteNoMes(men,13,sc,true))} no 2º ano). `:""}Cenário: ${esc(SCEN[sc].nome)}, ${esc(SCEN[sc].desc.toLowerCase())}. A poupança segue a regra oficial: 0,5% ao mês mais TR enquanto a Selic estiver acima de 8,5%.</p>
   </div>
 
   ${cartaoProtecao(val, men, h, sc, best, cur, atual)}
@@ -712,53 +770,168 @@ function cartaoProtecao(val, men, h, sc, best, cur, atual){
   </div>`;
 }
 
-function comparar(){
+function filtrarComp(c){
+  return P.filter(p => c.filtro==="todos" || (c.filtro==="diaria" ? ["diaria","imediata","d1"].includes(p.liq) : ["mercado","venc"].includes(p.liq)));
+}
+function calcComparador(){
   const c = perfil.comp;
-  const filtro = c.filtro;
-  let lista = P.filter(p => filtro==="todos" || (filtro==="diaria" ? ["diaria","imediata","d1"].includes(p.liq) : ["mercado","venc"].includes(p.liq)));
-  const res = lista.map(p=>{ const s=simular(p,c.inicial,c.mensal,c.meses,c.cen); const f=s[c.meses]; return {p,s,f,aa:f.inv>0?(Math.pow(f.liq/f.inv,12/c.meses)-1)*100:0}; })
+  const res = filtrarComp(c).map(p=>{ const s=simular(p,c.inicial,c.mensal,c.meses,c.cen); const f=s[c.meses];
+    return {p,s,f,aa:f.inv>0?(Math.pow(f.liq/f.inv,12/c.meses)-1)*100:0}; })
     .sort((a,b)=> c.ordem==="protecao" ? (prot(b.p).nivel-prot(a.p).nivel) || (b.f.liq-a.f.liq) : b.f.liq-a.f.liq);
-  if (!c.vis) c.vis = res.slice(0,5).map(x=>x.p.id);
-  const vis = res.filter(x=>c.vis.includes(x.p.id));
-  const atual = byId(perfil.reservaAtual)||byId("poupbb");
-  const sc = SCEN[c.cen];
+  if (!c.vis || !c.vis.length) c.vis = res.slice(0,4).map(x=>x.p.id);
+  const foco = res.find(x=>x.p.id===c.foco) || res[0];
+  return {c, res, foco};
+}
+function viradaMes(x, c){
+  for (let m=12; m<=c.meses; m++){
+    const ap = aporteNoMes(c.mensal, m, c.cen, perfil.corrigir!==false);
+    const ganho = (x.s[m].liq - x.s[m-1].liq) - (x.s[m].inv - x.s[m-1].inv);
+    if (c.mensal>0 && ganho >= ap) return m;
+  }
+  return null;
+}
+const PRESETS = [[6,"6 meses"],[12,"1 ano"],[24,"2 anos"],[36,"3 anos"],[60,"5 anos"],[120,"10 anos"],[180,"15 anos"],[240,"20 anos"],[360,"30 anos"]];
+const PRAZO_MAX = 480;
+
+function comparar(){
+  const {c, res, foco} = calcComparador();
+  const real = !!c.real, corr = perfil.corrigir!==false;
   return `<section class="view">
   <div><div class="eyebrow">Comparador</div><h2 class="title">${P.length} produtos, três cenários de juros</h2>
-  <p class="lede">Os pós-fixados acompanham o caminho da Selic no cenário escolhido. Prefixados e IPCA+ travam a taxa até o vencimento e depois passam a render o CDI.</p></div>
+  <p class="lede">Simule anos de aportes. Os pós-fixados seguem o caminho da Selic do cenário; prefixados e IPCA+ travam a taxa até o vencimento e depois rendem o CDI.</p></div>
+
   <div class="card stack">
     <div class="row">
-      <div class="field"><label for="cIni">Aporte inicial</label><div class="input"><span>R$</span><input id="cIni" type="number" min="0" step="500" value="${c.inicial}"></div></div>
-      <div class="field"><label for="cMen">Aporte mensal</label><div class="input"><span>R$</span><input id="cMen" type="number" min="0" step="100" value="${c.mensal}"></div></div>
-      <div class="field" style="flex:2 1 220px"><label for="cPrazo">Prazo: <span class="num">${c.meses} meses (${fmtN(c.meses/12,1)} anos)</span></label><input id="cPrazo" type="range" min="6" max="240" value="${c.meses}"></div>
+      <div class="field"><label for="cIni">Aporte inicial</label><div class="input"><span>R$</span><input id="cIni" type="number" min="0" step="500" value="${c.inicial}" inputmode="decimal"></div></div>
+      <div class="field"><label for="cMen">Aporte mensal</label><div class="input"><span>R$</span><input id="cMen" type="number" min="0" step="100" value="${c.mensal}" inputmode="decimal"></div></div>
     </div>
+    <div class="switches">
+      <label class="switch"><input type="checkbox" id="cCorr" ${corr?"checked":""}><span class="sw-ui" aria-hidden="true"></span><span><b>Corrigir aportes pela inflação</b><span class="tiny">O aporte sobe ${pct(ipcaCen(c.cen),1)} a cada 12 meses e mantém o mesmo poder de compra</span></span></label>
+      <label class="switch"><input type="checkbox" id="cReal" ${real?"checked":""}><span class="sw-ui" aria-hidden="true"></span><span><b>Mostrar em dinheiro de hoje</b><span class="tiny">Desconta a inflação: mostra o que o valor futuro compra hoje</span></span></label>
+    </div>
+
+    <div class="prazo">
+      <div class="prazo-top">
+        <div style="min-width:0">
+          <div class="eyebrow">Prazo</div>
+          <div class="prazo-val" id="cPrazoTxt">${duracaoTxt(c.meses)}</div>
+          <div class="tiny" id="cPrazoData">${dataMes(0)} a ${dataMes(c.meses)} · ${c.meses} meses</div>
+        </div>
+        <div class="stepper" role="group" aria-label="Ajuste fino do prazo">
+          <button type="button" data-d="-12" aria-label="Menos 1 ano">−1a</button>
+          <button type="button" data-d="-1" aria-label="Menos 1 mês">−1m</button>
+          <div class="input stepper-n"><input id="cPrazoN" type="number" min="1" max="${PRAZO_MAX}" value="${c.meses}" inputmode="numeric" aria-label="Prazo em meses"><span>meses</span></div>
+          <button type="button" data-d="1" aria-label="Mais 1 mês">+1m</button>
+          <button type="button" data-d="12" aria-label="Mais 1 ano">+1a</button>
+        </div>
+      </div>
+      <div class="range-wrap">
+        <output class="bubble" id="cBubble" for="cPrazo"></output>
+        <input id="cPrazo" class="range" type="range" min="1" max="${PRAZO_MAX}" step="1" value="${c.meses}" style="--p:${(c.meses-1)/(PRAZO_MAX-1)*100}%" aria-label="Prazo">
+        <div class="ticks" aria-hidden="true">${[0,5,10,15,20,25,30,35,40].map(a=>`<span style="left:${Math.max(a*12-1,0)/(PRAZO_MAX-1)*100}%">${a}a</span>`).join("")}</div>
+      </div>
+      <div class="presets" id="cPresets">${PRESETS.map(([m,l])=>`<button type="button" data-v="${m}" aria-pressed="${m===c.meses}">${l}</button>`).join("")}</div>
+    </div>
+
     <div class="row">
       <div class="field" style="flex:2 1 300px"><label>Cenário de juros</label><div class="seg" id="cCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===c.cen}">${v.nome}</button>`).join("")}</div></div>
       <div class="field" style="flex:1 1 220px"><label>Ordenar por</label><div class="seg" id="cOrd">${[["rendimento","Rendimento"],["protecao","Proteção"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${(c.ordem||"rendimento")===k}">${v}</button>`).join("")}</div></div>
-      <div class="field" style="flex:1 1 240px"><label>Liquidez</label><div class="seg" id="cFil">${[["todos","Todos"],["diaria","Diária"],["longo","Longo prazo"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===filtro}">${v}</button>`).join("")}</div></div>
+      <div class="field" style="flex:1 1 240px"><label>Liquidez</label><div class="seg" id="cFil">${[["todos","Todos"],["diaria","Diária"],["longo","Longo prazo"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===c.filtro}">${v}</button>`).join("")}</div></div>
     </div>
-    <div class="tiny">${esc(sc.desc)}. IPCA considerado: ${pct(sc.ipca,1)} ao ano.</div>
+    <div class="tiny" id="cCenTxt">${esc(SCEN[c.cen].desc)}. Inflação considerada: ${pct(ipcaCen(c.cen),1)} ao ano.</div>
   </div>
+
+  <div class="kpibar" id="cKpis"></div>
+
   <div class="card stack">
-    <div class="row" style="justify-content:space-between;align-items:center"><h3>Patrimônio líquido ao longo do tempo</h3><span class="tiny">após IR e custódia</span></div>
-    <div class="legend" id="cLeg">${res.map((x,i)=>`<button type="button" data-id="${x.p.id}" aria-pressed="${c.vis.includes(x.p.id)}"><i style="background:var(${COLORS[i%COLORS.length]})"></i>${esc(rotulo(x.p))}</button>`).join("")}</div>
-    <div class="chartbox"><canvas id="cChart" aria-label="Gráfico de evolução do patrimônio"></canvas></div>
+    <div class="chart-head">
+      <div style="min-width:0"><h3 id="cChartTit">Patrimônio líquido ao longo do tempo</h3><div class="tiny" id="cChartSub"></div></div>
+      <div class="seg" id="cModo">${[["comparar","Comparar produtos"],["composicao","Aportes x juros"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${(c.modo||"comparar")===k}">${v}</button>`).join("")}</div>
+    </div>
+    <div class="row" style="align-items:center">
+      <div class="field" style="flex:2 1 260px"><label for="cFoco">Produto em destaque</label><div class="input"><select id="cFoco">${res.map(x=>`<option value="${x.p.id}" ${x.p.id===foco.p.id?"selected":""}>${esc(rotulo(x.p))} · ${taxaTxt(x.p)}</option>`).join("")}</select></div></div>
+      <details class="pick" ${c.modo==="composicao"?"hidden":""}><summary>Linhas no gráfico: <b id="cVisN">${c.vis.length}</b> de ${res.length}</summary>
+        <div class="legend" id="cLeg">${res.map((x,i)=>`<button type="button" data-id="${x.p.id}" aria-pressed="${c.vis.includes(x.p.id)}"><i style="background:var(${COLORS[i%COLORS.length]})"></i>${esc(rotulo(x.p))}</button>`).join("")}</div>
+      </details>
+    </div>
+    <div class="chartbox big"><canvas id="cChart" aria-label="Gráfico de evolução do patrimônio"></canvas></div>
+    <div class="leitura" id="cLeitura"></div>
   </div>
+
   <div class="card stack">
-    <h3>Ranking no mês ${c.meses}</h3>
+    <h3 id="cRankTit">Ranking em ${duracaoTxt(c.meses)}</h3>
     <div class="tablewrap"><table>
-      <thead><tr><th>#</th><th>Produto</th><th>Proteção</th><th>Taxa</th><th>Liquidez</th><th class="r">Bruto</th><th class="r">IR</th><th class="r">Líquido</th><th class="r">Ganho</th><th class="r">≈ a.a. líq.</th></tr></thead>
-      <tbody>${res.map((x,i)=>`<tr class="${i===0?"hl":""}"><td class="num">${i+1}</td>
-        <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${x.p.id===atual.id?' <span class="chip accent">atual</span>':""}</td>
-        <td>${protChip(x.p)}</td>
-        <td>${taxaTxt(x.p)}</td><td class="small">${esc(x.p.liqTxt)}</td>
-        <td class="r num">${brl(x.f.bruto)}</td><td class="r num">${x.f.ir>0?"-"+brl(x.f.ir):"isento"}</td>
-        <td class="r num"><b>${brl(x.f.liq)}</b></td><td class="r num">${brl(x.f.liq-x.f.inv)}</td><td class="r num">${pct(x.aa)}</td></tr>`).join("")}</tbody>
+      <thead><tr><th>#</th><th>Produto</th><th>Proteção</th><th>Taxa</th><th class="r">Você aporta</th><th class="r">IR pago</th><th class="r">Patrimônio líquido</th><th class="r">Em dinheiro de hoje</th><th class="r">≈ a.a. líq.</th></tr></thead>
+      <tbody id="cBody"></tbody>
     </table></div>
     <div class="protlegend">${[5,4,3,2,1,0].map(n=>`<div>${escudo(n)}<span class="tiny">${esc(NIVEIS[n].txt)}</span></div>`).join("")}</div>
-    <p class="tiny" style="margin:0">Total aportado: ${brl(res[0]?res[0].f.inv:0)}. Prefixados e IPCA+ sem marcação a mercado, ou seja, supondo que você segura até o vencimento.</p>
+    <p class="tiny" style="margin:0">Prefixados e IPCA+ considerados até o vencimento, sem marcação a mercado. "Em dinheiro de hoje" divide o valor final pela inflação acumulada do cenário.</p>
   </div>
 </section>`;
 }
+
+/* ---------- atualização parcial (sem redesenhar a tela) ---------- */
+const reduzMov = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function animarNumero(el, alvo, fmt){
+  if (!el) return;
+  const de = el._v ?? alvo; el._v = alvo;
+  if (reduzMov() || Math.abs(alvo-de) < 0.5){ el.textContent = fmt(alvo); return; }
+  const t0 = performance.now(), dur = 420;
+  cancelAnimationFrame(el._raf);
+  const passo = t => { const k=Math.min((t-t0)/dur,1), e=1-Math.pow(1-k,3); el.textContent = fmt(de+(alvo-de)*e); if(k<1) el._raf=requestAnimationFrame(passo); };
+  el._raf = requestAnimationFrame(passo);
+}
+function kpi(id, rot, sub){ return `<div class="kpix"><span>${rot}</span><b class="num" id="${id}"></b><small id="${id}S">${sub||""}</small></div>`; }
+function pintarComparador(){
+  const {c, res, foco} = calcComparador();
+  const real = !!c.real, def = deflator(c.meses, c.cen), f = foco.f;
+  const v = x => real ? x/def : x;
+  const virada = viradaMes(foco, c);
+  const jurosLiq = f.liq - f.inv;
+  const selF=document.getElementById("cFoco"); if (selF && selF.value!==foco.p.id) selF.value=foco.p.id;
+  // indicadores
+  const box = document.getElementById("cKpis");
+  if (box && !box.dataset.ok){ box.innerHTML = kpi("kAp","Você aporta")+kpi("kPat","Patrimônio líquido")+kpi("kJur","Juros líquidos")+kpi("kRen","Renda mensal sustentável")+kpi("kVir","Ponto de virada"); box.dataset.ok="1"; }
+  animarNumero(document.getElementById("kAp"), v(f.inv), x=>brl(x));
+  animarNumero(document.getElementById("kPat"), v(f.liq), x=>brl(x));
+  animarNumero(document.getElementById("kJur"), v(jurosLiq), x=>brl(x));
+  const taxaFim = annual(foco.p, c.meses, c.cen)*(foco.p.ir==="reg"?0.85:1);
+  const realFim = ((1+taxaFim/100)/(1+ipcaCen(c.cen)/100)-1);
+  animarNumero(document.getElementById("kRen"), (f.liq/def)*(Math.pow(1+Math.max(realFim,0),1/12)-1), x=>brl(x));
+  const set = (id,t)=>{ const e=document.getElementById(id); if(e) e.textContent=t; };
+  set("kApS", real ? `${brl(f.inv)} sem descontar a inflação` : `${brl(f.inv/def)} em dinheiro de hoje`);
+  set("kPatS", real ? `${brl(f.liq)} em valores da época` : `${brl(f.liq/def)} em dinheiro de hoje`);
+  set("kJurS", `${pct(f.liq>0?jurosLiq/f.liq*100:0,0)} do patrimônio vem dos juros`);
+  set("kRenS", "em dinheiro de hoje, sem consumir o patrimônio");
+  set("kVir", virada ? duracaoTxt(virada) : "fora do prazo");
+  set("kVirS", virada ? `Em ${dataMes(virada)} os juros do mês superam o aporte` : (c.mensal>0 ? "Os juros ainda não superam o aporte mensal" : "Defina um aporte mensal"));
+  // textos do prazo
+  set("cPrazoTxt", duracaoTxt(c.meses));
+  set("cPrazoData", `${dataMes(0)} a ${dataMes(c.meses)} · ${c.meses} meses`);
+  set("cRankTit", `Ranking em ${duracaoTxt(c.meses)}`);
+  set("cChartTit", c.modo==="composicao" ? `De onde vem o patrimônio em ${rotulo(foco.p)}` : "Patrimônio líquido ao longo do tempo");
+  set("cChartSub", (real?"Em dinheiro de hoje":"Em valores da época")+" · após IR e custódia");
+  // leitura
+  const leitura = document.getElementById("cLeitura");
+  if (leitura){
+    const ap1 = c.mensal>0 ? (perfil.corrigir!==false ? ` com aportes de ${brl(c.mensal)} por mês corrigidos pela inflação (${brl(aporteNoMes(c.mensal,c.meses,c.cen,true))} no último ano)` : ` com aportes fixos de ${brl(c.mensal)} por mês`) : "";
+    const pior = res[res.length-1];
+    leitura.innerHTML = `<p>Em <b>${duracaoTxt(c.meses)}</b>, começando com ${brl(c.inicial)}${ap1}, você coloca <b class="num">${brl(f.inv)}</b> do próprio bolso. Em <b>${esc(rotulo(foco.p))}</b> isso vira <b class="num">${brl(f.liq)}</b> líquidos, que compram o mesmo que <b class="num">${brl(f.liq/def)}</b> hoje.</p>
+      <p>${jurosLiq>0?`Os juros respondem por <b>${pct(jurosLiq/f.liq*100,0)}</b> do total.`:""} ${pior&&pior.p.id!==foco.p.id?`A diferença para ${esc(rotulo(pior.p))}, a pior opção da lista, é de <b class="num">${brl(f.liq-pior.f.liq)}</b>.`:""} ${virada?`A partir de ${dataMes(virada)} o dinheiro passa a render por mês mais do que você aporta.`:""}</p>`;
+  }
+  // ranking
+  const body = document.getElementById("cBody");
+  if (body){
+    const atual = byId(perfil.reservaAtual);
+    body.innerHTML = res.map((x,i)=>`<tr class="${x.p.id===foco.p.id?"hl":""}"><td class="num">${i+1}</td>
+      <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${atual&&x.p.id===atual.id?' <span class="chip accent">atual</span>':""}</td>
+      <td>${protChip(x.p)}</td><td>${taxaTxt(x.p)}</td>
+      <td class="r num">${brl(x.f.inv)}</td><td class="r num">${x.f.ir>0?"-"+brl(x.f.ir):"isento"}</td>
+      <td class="r num"><b>${brl(x.f.liq)}</b></td><td class="r num">${brl(x.f.liq/def)}</td><td class="r num">${pct(x.aa)}</td></tr>`).join("");
+  }
+  desenharComparador(res, foco);
+}
+
 
 function metas(){
   const g = perfil.meta, p = byId(g.produto)||byId("bv");
@@ -770,7 +943,7 @@ function metas(){
   const fim = mesAt!=null ? s[mesAt] : null;
   return `<section class="view">
   <div><div class="eyebrow">Metas</div><h2 class="title">Quando você chega lá</h2>
-  <p class="lede">Escolha o alvo e o produto. O cálculo mostra a data provável e quanto aportar por mês para chegar antes.</p></div>
+  <p class="lede">Escolha o alvo e o produto. O cálculo mostra a data provável e quanto aportar por mês para chegar antes. ${perfil.corrigir!==false?"Os aportes sobem com a inflação a cada 12 meses (altere no Comparador).":"Aportes fixos, sem correção pela inflação."}</p></div>
   <div class="card">
     <div class="row">
       <div class="field"><label for="gAlvo">Meta</label><div class="input"><span>R$</span><input id="gAlvo" type="number" min="1000" step="5000" value="${g.alvo}"></div></div>
@@ -1033,14 +1206,39 @@ function bind(r){
   }
   if (r==="comparar"){
     const c=perfil.comp;
-    on("cIni","input",e=>{c.inicial=num(e.target.value);softRender();});
-    on("cMen","input",e=>{c.mensal=num(e.target.value);softRender();});
-    on("cPrazo","input",e=>{c.meses=+e.target.value;softRender();});
+    let raf=null; const agenda=()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ pintarComparador(); salvar(); }); };
+    const PMAX=PRAZO_MAX;
+    const visualPrazo = m => {
+      const p=(m-1)/(PMAX-1)*100, r=document.getElementById("cPrazo"), bub=document.getElementById("cBubble"), nI=document.getElementById("cPrazoN");
+      if (r){ r.value=m; r.style.setProperty("--p",p+"%"); }
+      if (bub){ bub.textContent = m<12 ? m+"m" : Math.floor(m/12)+"a"+(m%12?" "+(m%12)+"m":""); bub.style.left=`calc(13px + (100% - 26px) * ${p/100})`; }
+      if (nI && document.activeElement!==nI) nI.value=m;
+      const t=document.getElementById("cPrazoTxt"); if(t) t.textContent=duracaoTxt(m);
+      const d=document.getElementById("cPrazoData"); if(d) d.textContent=`${dataMes(0)} a ${dataMes(m)} · ${m} meses`;
+      document.querySelectorAll("#cPresets button").forEach(b=>b.setAttribute("aria-pressed", String(+b.dataset.v===m)));
+    };
+    const setPrazo = m => { m=Math.max(1,Math.min(PMAX,Math.round(m)||1)); c.meses=m; visualPrazo(m); agenda(); };
+    let tw=null;
+    const animarPrazo = alvo => { alvo=Math.max(1,Math.min(PMAX,alvo)); const de=c.meses; cancelAnimationFrame(tw);
+      if (reduzMov()||de===alvo){ setPrazo(alvo); return; }
+      const t0=performance.now(), dur=420; const passo=t=>{ const k=Math.min((t-t0)/dur,1), e=1-Math.pow(1-k,3); visualPrazo(Math.round(de+(alvo-de)*e)); if(k<1) tw=requestAnimationFrame(passo); else setPrazo(alvo); }; tw=requestAnimationFrame(passo); };
+    visualPrazo(c.meses);
+    on("cPrazo","input",e=>setPrazo(+e.target.value));
+    on("cPrazoN","input",e=>{ if(e.target.value!=="") setPrazo(+e.target.value); });
+    on("cPrazoN","blur",e=>{ e.target.value=c.meses; });
+    document.querySelectorAll(".stepper button").forEach(b=>b.addEventListener("click",()=>animarPrazo(c.meses + +b.dataset.d)));
+    document.querySelectorAll("#cPresets button").forEach(b=>b.addEventListener("click",()=>animarPrazo(+b.dataset.v)));
+    on("cIni","input",e=>{c.inicial=num(e.target.value);agenda();});
+    on("cMen","input",e=>{c.mensal=num(e.target.value);agenda();});
+    on("cCorr","change",e=>{perfil.corrigir=e.target.checked;agenda();});
+    on("cReal","change",e=>{c.real=e.target.checked;agenda();});
+    on("cFoco","change",e=>{c.foco=e.target.value;agenda();});
     document.querySelectorAll("#cCen button").forEach(b=>b.addEventListener("click",()=>{c.cen=b.dataset.v;render();salvar();}));
     document.querySelectorAll("#cOrd button").forEach(b=>b.addEventListener("click",()=>{c.ordem=b.dataset.v;render();salvar();}));
-    document.querySelectorAll("#cFil button").forEach(b=>b.addEventListener("click",()=>{c.filtro=b.dataset.v;c.vis=null;render();salvar();}));
-    document.querySelectorAll("#cLeg button").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.id; c.vis=c.vis.includes(id)?c.vis.filter(x=>x!==id):[...c.vis,id]; render(); salvar();}));
-    desenharComparador();
+    document.querySelectorAll("#cFil button").forEach(b=>b.addEventListener("click",()=>{c.filtro=b.dataset.v;c.vis=null;c.foco=null;render();salvar();}));
+    document.querySelectorAll("#cModo button").forEach(b=>b.addEventListener("click",()=>{c.modo=b.dataset.v;render();salvar();}));
+    document.querySelectorAll("#cLeg button").forEach(b=>b.addEventListener("click",()=>{ const id=b.dataset.id; c.vis=c.vis.includes(id)?c.vis.filter(x=>x!==id):[...c.vis,id]; b.setAttribute("aria-pressed",String(c.vis.includes(id))); const n=document.getElementById("cVisN"); if(n) n.textContent=c.vis.length; agenda(); }));
+    pintarComparador();
   }
   if (r==="metas"){
     const g=perfil.meta;
@@ -1095,17 +1293,66 @@ function baseOpts(){
     scales:{x:{grid:{display:false},ticks:{color:ink2,maxTicksLimit:8,callback:function(v){const m=+this.getLabelForValue(v);return m%12===0?(m/12)+"a":m+"m";}},border:{color:line}},
       y:{grid:{color:line},ticks:{color:ink2,callback:v=>v>=1000?"R$ "+(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil":brl(v)},border:{display:false}}}};
 }
-function desenharComparador(){
+/* ---------- gráfico do comparador ---------- */
+const plugCruz = { id:"cruz", afterDraw(ch){ const a=ch.tooltip&&ch.tooltip.getActiveElements&&ch.tooltip.getActiveElements(); if(!a||!a.length) return;
+  const x=a[0].element.x, {top,bottom}=ch.chartArea, g=ch.ctx; g.save(); g.strokeStyle=cssv("--ink-3"); g.setLineDash([4,4]); g.lineWidth=1; g.beginPath(); g.moveTo(x,top); g.lineTo(x,bottom); g.stroke(); g.restore(); } };
+const plugRotulos = { id:"rotulos", afterDatasetsDraw(ch, args, opt){ if(!opt||!opt.on) return; const g=ch.ctx, itens=[];
+  ch.data.datasets.forEach((d,i)=>{ const meta=ch.getDatasetMeta(i); if(meta.hidden||d.semRotulo) return; const pt=meta.data[meta.data.length-1]; if(!pt) return; const rt=d.label.replace(/^Tesouro /,"").replace(/ \(via [^)]*\)/,""); itens.push({y:pt.y,x:pt.x,t:rt.length>21?rt.slice(0,20)+"…":rt,v:d.data[d.data.length-1],c:d.borderColor}); });
+  itens.sort((a,b)=>a.y-b.y); for(let i=1;i<itens.length;i++) if(itens[i].y-itens[i-1].y<26) itens[i].y=itens[i-1].y+26;
+  g.save(); g.font="600 11.5px Figtree, system-ui, sans-serif"; g.textBaseline="middle";
+  itens.forEach(it=>{ g.fillStyle=it.c; g.beginPath(); g.arc(it.x,Math.min(Math.max(it.y,ch.chartArea.top),ch.chartArea.bottom),3.5,0,7); g.fill();
+    g.fillText(it.t, it.x+8, it.y-6); g.fillStyle=cssv("--ink-2"); g.font="500 11px 'IBM Plex Mono', monospace"; g.fillText(brl(it.v), it.x+8, it.y+7); g.font="600 11.5px Figtree, system-ui, sans-serif"; });
+  g.restore(); } };
+const plugVirada = { id:"virada", afterDatasetsDraw(ch, args, opt){ if(!opt||opt.idx==null) return; const sx=ch.scales.x; const x=sx.getPixelForValue(opt.idx); if(!isFinite(x)) return;
+  const {top,bottom}=ch.chartArea, g=ch.ctx; g.save(); g.strokeStyle=cssv("--gold"); g.lineWidth=1.5; g.setLineDash([5,4]); g.beginPath(); g.moveTo(x,top+18); g.lineTo(x,bottom); g.stroke(); g.setLineDash([]);
+  g.fillStyle=cssv("--gold"); g.font="700 11px Figtree, system-ui, sans-serif"; const t="Ponto de virada · "+opt.txt; const w=g.measureText(t).width; const lx=Math.min(Math.max(x-w/2,ch.chartArea.left),ch.chartArea.right-w);
+  g.fillText(t, lx, top+10); g.restore(); } };
+
+function desenharComparador(res, foco){
   if (!window.Chart) return;
-  const c=perfil.comp; const el=document.getElementById("cChart"); if(!el) return;
-  const filtro=c.filtro;
-  const lista=P.filter(p=>filtro==="todos"||(filtro==="diaria"?["diaria","imediata","d1"].includes(p.liq):["mercado","venc"].includes(p.liq)));
-  const res=lista.map(p=>({p,s:simular(p,c.inicial,c.mensal,c.meses,c.cen)})).sort((a,b)=>b.s[c.meses].liq-a.s[c.meses].liq);
-  const step=c.meses>120?6:c.meses>48?3:1; const idx=[]; for(let m=0;m<=c.meses;m+=step) idx.push(m); if(idx[idx.length-1]!==c.meses) idx.push(c.meses);
-  const ds=res.map((x,i)=>({x,i})).filter(o=>c.vis.includes(o.x.p.id)).map(o=>({label:rotulo(o.x.p),data:idx.map(m=>o.x.s[m].liq),borderColor:cssv(COLORS[o.i%COLORS.length]),backgroundColor:cssv(COLORS[o.i%COLORS.length]),borderWidth:o.i===0?3:2,pointRadius:0,tension:.2}));
-  ds.push({label:"Total aportado",data:idx.map(m=>res[0]?res[0].s[m].inv:0),borderColor:cssv("--ink-3"),borderDash:[5,5],borderWidth:1.5,pointRadius:0});
-  charts.c=new Chart(el,{type:"line",data:{labels:idx,datasets:ds},options:baseOpts()});
+  const el=document.getElementById("cChart"); if(!el) return;
+  if (!res){ const r=calcComparador(); res=r.res; foco=r.foco; }
+  const c=perfil.comp, real=!!c.real, modo=c.modo||"comparar";
+  const n=c.meses, alvoPts=150, step=Math.max(1,Math.ceil(n/alvoPts)); const idx=[]; for(let m=0;m<=n;m+=step) idx.push(m); if(idx[idx.length-1]!==n) idx.push(n);
+  const v=(x,m)=> real ? x/deflator(m,c.cen) : x;
+  const larg = el.parentElement.clientWidth;
+  let ds;
+  if (modo==="composicao"){
+    ds=[{label:"Você aportou",data:idx.map(m=>v(foco.s[m].inv,m)),borderColor:cssv("--ink-3"),backgroundColor:cssv("--surface-2"),fill:"origin",borderWidth:1.5,pointRadius:0,tension:.25,stack:"s",semRotulo:true},
+        {label:"Juros líquidos",data:idx.map(m=>v(foco.s[m].liq-foco.s[m].inv,m)),borderColor:cssv("--accent"),backgroundColor:cssv("--accent-soft"),fill:"-1",borderWidth:2.5,pointRadius:0,tension:.25,stack:"s"}];
+  } else {
+    const vis=res.map((x,i)=>({x,i})).filter(o=>c.vis.includes(o.x.p.id) || o.x.p.id===foco.p.id);
+    ds=vis.map(o=>{ const cor=cssv(COLORS[o.i%COLORS.length]); const dest=o.x.p.id===foco.p.id;
+      return {label:rotulo(o.x.p),data:idx.map(m=>v(o.x.s[m].liq,m)),borderColor:cor,backgroundColor:dest?(ctx=>{ const a=ctx.chart.chartArea; if(!a) return "transparent"; const gr=ctx.chart.ctx.createLinearGradient(0,a.top,0,a.bottom); gr.addColorStop(0,cor+"33"); gr.addColorStop(1,cor+"00"); return gr; }):cor,
+        fill:dest?"origin":false,borderWidth:dest?3.2:1.8,pointRadius:0,pointHoverRadius:4,tension:.25,order:dest?0:1}; });
+    ds.push({label:"Você aportou",data:idx.map(m=>v(res[0].s[m].inv,m)),borderColor:cssv("--ink-3"),borderDash:[5,5],borderWidth:1.5,pointRadius:0,tension:0,semRotulo:true,order:2});
+  }
+  const virada = viradaMes(foco, c);
+  const viradaIdx = virada!=null ? idx.findIndex(m=>m>=virada) : null;
+  const o=baseOpts();
+  o.animation={duration:reduzMov()?0:450,easing:"easeOutCubic"};
+  o.layout={padding:{right: modo==="comparar" && larg>560 ? 150 : 8, top:24}};
+  const passoAnos = n<=24 ? 0 : n<=72 ? 1 : n<=144 ? (larg<500?2:1) : n<=264 ? (larg<500?5:2) : 5;
+  const passoMeses = n<=12 ? 1 : 3;
+  o.scales.x.ticks.autoSkip=false; o.scales.x.ticks.maxRotation=0;
+  o.scales.x.ticks.callback=function(val){ const m=+this.getLabelForValue(val);
+    if (m===0) return "hoje";
+    if (passoAnos===0) return m%passoMeses===0 ? m+"m" : "";
+    return (m%12===0 && (m/12)%passoAnos===0) ? (m/12)+(m===12?" ano":" anos") : ""; };
+  o.scales.y.stacked = modo==="composicao";
+  o.scales.y.ticks.callback=v=> v>=1e6 ? "R$ "+(v/1e6).toLocaleString("pt-BR",{maximumFractionDigits:1})+" mi" : v>=1000 ? "R$ "+(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil" : brl(v);
+  o.plugins.tooltip.callbacks.title=it=>{ const m=+it[0].label; return duracaoTxt(m)+" · "+dataMes(m); };
+  o.plugins.tooltip.itemSort=(a,b)=>b.parsed.y-a.parsed.y;
+  o.plugins.tooltip.callbacks.footer = modo==="composicao" ? (it=>{ const t=it.reduce((s,x)=>s+x.parsed.y,0); return "Total: "+brl(t); }) : undefined;
+  o.plugins.rotulos={on: modo==="comparar" && larg>560};
+  o.plugins.virada={idx: viradaIdx>=0?viradaIdx:null, txt: virada?dataMes(virada):""};
+  if (charts.c && charts.c.config.type==="line" && charts.c._modo===modo){
+    charts.c.data.labels=idx; charts.c.data.datasets=ds; charts.c.options=o; charts.c.update(); return;
+  }
+  if (charts.c) charts.c.destroy();
+  charts.c=new Chart(el,{type:"line",data:{labels:idx,datasets:ds},options:o,plugins:[plugCruz,plugRotulos,plugVirada]}); charts.c._modo=modo;
 }
+
 function desenharReserva(){
   if (!window.Chart) return;
   const el=document.getElementById("rChart"); if(!el) return;
@@ -1114,7 +1361,7 @@ function desenharReserva(){
   const rk=rankReserva(val,men,h,sc); const cur=rk.find(x=>x.p.id===atual.id); const cols=[cur,...rk.filter(x=>x.p.id!==atual.id).slice(0,3)];
   const step=h>36?2:1; const idx=[]; for(let m=0;m<=h;m+=step) idx.push(m); if(idx[idx.length-1]!==h) idx.push(h);
   const ds=cols.map((c,i)=>({label:rotulo(c.p),data:idx.map(m=>c.s[m].liq),borderColor:cssv(i===0?"--c7":COLORS[i-1]),backgroundColor:cssv(i===0?"--c7":COLORS[i-1]),borderWidth:i===1?3:2,borderDash:i===0?[6,4]:undefined,pointRadius:0,tension:.2}));
-  ds.push({label:"Você aporta",data:idx.map(m=>val+men*m),borderColor:cssv("--line"),borderWidth:1.5,pointRadius:0});
+  ds.push({label:"Você aporta",data:idx.map(m=>cur.s[m].inv),borderColor:cssv("--line"),borderWidth:1.5,pointRadius:0});
   charts.r=new Chart(el,{type:"line",data:{labels:idx,datasets:ds},options:baseOpts()});
 }
 function desenharMeta(){
