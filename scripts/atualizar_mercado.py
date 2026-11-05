@@ -59,7 +59,8 @@ def sgs(serie):
 def focus(indicador, ano):
     filtro = f"Indicador eq '{indicador}' and DataReferencia eq '{ano}' and baseCalculo eq 0"
     q = urllib.parse.urlencode({"$top": "1", "$filter": filtro, "$orderby": "Data desc",
-                                "$format": "json", "$select": "Indicador,Data,DataReferencia,Mediana"})
+                                "$format": "json", "$select": "Indicador,Data,DataReferencia,Mediana"},
+                               quote_via=urllib.parse.quote)  # OData exige %20, não "+"
     url = "https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?" + q
     linha = json.loads(baixar(url, 30))["value"][0]
     return float(linha["Mediana"]), linha["Data"]
