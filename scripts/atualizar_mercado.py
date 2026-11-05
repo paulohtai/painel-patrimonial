@@ -34,8 +34,12 @@ TITULOS = {
     "pre32": ("Tesouro Prefixado", "01/01/2032"),
     "ipca32": ("Tesouro IPCA+", "15/08/2032"),
     "ipca40": ("Tesouro IPCA+", "15/08/2040"),
+    "pre37s": ("Tesouro Prefixado com Juros Semestrais", "01/01/2037"),
+    "ipca37s": ("Tesouro IPCA+ com Juros Semestrais", "15/05/2037"),
+    "ipca45s": ("Tesouro IPCA+ com Juros Semestrais", "15/05/2045"),
 }
-FAIXAS = {"tselic": (-0.5, 1.0), "pre29": (5, 30), "pre32": (5, 30), "ipca32": (2, 15), "ipca40": (2, 15)}
+FAIXAS = {"tselic": (-0.5, 1.0), "pre29": (5, 30), "pre32": (5, 30), "ipca32": (2, 15), "ipca40": (2, 15),
+          "pre37s": (5, 30), "ipca37s": (2, 15), "ipca45s": (2, 15)}
 CSV_TESOURO = ("https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/"
                "resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/PrecoTaxaTesouroDireto.csv")
 
