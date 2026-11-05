@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-11-05T14:50-03:00",
+  "atualizadoEm": "2026-11-05T15:23-03:00",
   "fonte": "Banco Central (SGS e Focus) e Tesouro Transparente",
   "selic": 13.75,
   "cdi": 13.65,
@@ -65,6 +65,21 @@
     },
     "ipca32": {
       "taxa": 7.89,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "ipca37s": {
+      "taxa": 7.76,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "ipca45s": {
+      "taxa": 7.47,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "pre37s": {
+      "taxa": 15.23,
       "fonte": "Tesouro Transparente",
       "data": "2026-10-30"
     }
