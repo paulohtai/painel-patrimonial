@@ -165,7 +165,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
 /* Tabela */
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:680px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
 th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);text-align:left;font-weight:700;padding:10px 12px;background:var(--surface-2);position:sticky;top:0}
 td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
 td.r,th.r{text-align:right}
@@ -209,6 +209,14 @@ tr.hl td{background:color-mix(in srgb,var(--accent-soft) 50%,transparent)}
 footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top:1px solid var(--line)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 [hidden]{display:none!important}
+.shield{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:3px 9px 3px 7px;border-radius:999px;white-space:nowrap}
+.shield.good{background:var(--good-soft);color:var(--good)} .shield.accent{background:var(--accent-soft);color:var(--accent)}
+.shield.warn{background:var(--warn-soft);color:var(--warn)} .shield.crit{background:var(--crit-soft);color:var(--crit)}
+.bars{display:inline-flex;gap:2px;align-items:flex-end}
+.bars i{width:4px;height:10px;border-radius:2px;background:currentColor;opacity:.22}
+.bars i.on{opacity:1}
+.protlegend{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.protlegend div{display:flex;flex-direction:column;gap:4px}
 .iconbtn{border:0;background:var(--surface-2);color:var(--ink-2);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none}
 .iconbtn svg{width:18px;height:18px}
 .install{display:flex;gap:12px;align-items:flex-start}
@@ -250,7 +258,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 
 <footer class="wrap foot">
   <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
-  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v1.2</span></p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v1.3</span></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -298,19 +306,33 @@ const P = [
   {id:"ipca32",nome:"Tesouro IPCA+ 2032",inst:"Tesouro Direto",tipo:"ipca",taxa:8.03,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-08-15",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
   {id:"ipca40",nome:"Tesouro IPCA+ 2040",inst:"Tesouro Direto",tipo:"ipca",taxa:7.54,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2040-08-15",cond:"Oscila antes do vencimento",fonte:"InfoMoney",data:"2026-10-29"}
 ];
-/* Proteção: quem garante e de que tamanho é a instituição. nivel 3 = Tesouro, 2 = banco grande, 1 = digital ou médio, 0 = financeira */
+/* Proteção: escala de 0 a 5.
+   5 Tesouro Nacional direto | 4 FGC em banco grande | 3 FGC em banco digital grande, ou títulos públicos via instituição de pagamento
+   2 FGC em banco médio | 1 FGC em financeira pequena | 0 sem garantia */
 const PROT = {
-  bv:{cong:"BV",porte:"Banco grande",nivel:2}, bmg:{cong:"BMG",porte:"Banco médio",nivel:1}, sofisa:{cong:"Sofisa",porte:"Banco médio",nivel:1},
-  daycoval:{cong:"Daycoval",porte:"Banco médio",nivel:1}, c6:{cong:"C6",porte:"Banco digital",nivel:1}, nubank:{cong:"Nubank",porte:"Banco digital",nivel:1},
-  inter:{cong:"Inter",porte:"Banco digital",nivel:1}, itau:{cong:"Itaú",porte:"Banco grande",nivel:2}, mp:{cong:null,porte:"Títulos públicos",nivel:2},
-  bb:{cong:"Banco do Brasil",porte:"Banco grande",nivel:2}, nuturbo:{cong:"Nubank",porte:"Banco digital",nivel:1}, picpay:{cong:"PicPay",porte:"Banco digital",nivel:1},
-  pagbank:{cong:"PagBank",porte:"Banco digital",nivel:1}, bradesco:{cong:"Bradesco",porte:"Banco grande",nivel:2}, santander:{cong:"Santander",porte:"Banco grande",nivel:2}, caixa:{cong:"Caixa",porte:"Banco grande",nivel:2}, poupbb:{cong:"Banco do Brasil",porte:"Banco grande",nivel:2},
-  tselic:{cong:null,porte:"Tesouro Nacional",nivel:3}, pre29:{cong:null,porte:"Tesouro Nacional",nivel:3}, pre32:{cong:null,porte:"Tesouro Nacional",nivel:3},
-  ipca32:{cong:null,porte:"Tesouro Nacional",nivel:3}, ipca40:{cong:null,porte:"Tesouro Nacional",nivel:3}, dm:{cong:"DM Financeira",porte:"Financeira",nivel:0}
+  tselic:{cong:null,porte:"Tesouro Nacional",nivel:5}, pre29:{cong:null,porte:"Tesouro Nacional",nivel:5}, pre32:{cong:null,porte:"Tesouro Nacional",nivel:5},
+  ipca32:{cong:null,porte:"Tesouro Nacional",nivel:5}, ipca40:{cong:null,porte:"Tesouro Nacional",nivel:5},
+  bb:{cong:"Banco do Brasil",porte:"Banco grande",nivel:4}, poupbb:{cong:"Banco do Brasil",porte:"Banco grande",nivel:4},
+  itau:{cong:"Itaú",porte:"Banco grande",nivel:4}, bradesco:{cong:"Bradesco",porte:"Banco grande",nivel:4}, santander:{cong:"Santander",porte:"Banco grande",nivel:4},
+  caixa:{cong:"Caixa",porte:"Banco grande",nivel:4}, bv:{cong:"BV",porte:"Banco grande",nivel:4},
+  nubank:{cong:"Nubank",porte:"Banco digital",nivel:3}, nuturbo:{cong:"Nubank",porte:"Banco digital",nivel:3}, inter:{cong:"Inter",porte:"Banco digital",nivel:3},
+  c6:{cong:"C6",porte:"Banco digital",nivel:3}, picpay:{cong:"PicPay",porte:"Banco digital",nivel:3}, pagbank:{cong:"PagBank",porte:"Banco digital",nivel:3},
+  mp:{cong:null,porte:"Títulos públicos via Mercado Pago",nivel:3},
+  bmg:{cong:"BMG",porte:"Banco médio",nivel:2}, sofisa:{cong:"Sofisa",porte:"Banco médio",nivel:2}, daycoval:{cong:"Daycoval",porte:"Banco médio",nivel:2},
+  dm:{cong:"DM Financeira",porte:"Financeira",nivel:1}
 };
-const prot = p => PROT[p.id] || {cong:p.inst,porte:"",nivel:1};
+const NIVEIS = {
+  5:{rot:"Tesouro Nacional",cls:"good",txt:"Garantia soberana do governo federal, sem depender de nenhum banco."},
+  4:{rot:"FGC · banco grande",cls:"good",txt:"Coberto pelo FGC e emitido por banco de grande porte, com risco de quebra muito baixo."},
+  3:{rot:"FGC · banco digital",cls:"accent",txt:"Coberto pelo FGC (ou lastreado em títulos públicos), em instituição digital grande."},
+  2:{rot:"FGC · banco médio",cls:"warn",txt:"Coberto pelo FGC, mas o banco é menor. Se quebrar, o FGC paga, porém pode levar semanas."},
+  1:{rot:"FGC · financeira",cls:"warn",txt:"Coberto pelo FGC, em instituição pequena. Maior chance de precisar do FGC."},
+  0:{rot:"Sem garantia",cls:"crit",txt:"Sem FGC e sem Tesouro. Se o emissor não pagar, pode haver perda."}
+};
+const prot = p => PROT[p.id] || {cong:p.inst,porte:"",nivel:2};
 const FGC_LIM = 250000, FGC_TETO = 1000000;
-function protChip(p){ const x=prot(p); const cls = x.nivel>=3?"good":x.nivel===2?"accent":x.nivel===1?"neutral":"warn"; return `<span class="chip ${cls}">${esc(x.porte)}</span>`; }
+function escudo(nivel, rotulo){ const n=NIVEIS[nivel]; return `<span class="shield ${n.cls}" title="${esc(n.txt)}"><span class="bars" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=nivel?"on":""}"></i>`).join("")}</span>${esc(rotulo||n.rot)}<span class="sr"> (proteção ${nivel} de 5)</span></span>`; }
+function protChip(p){ const x=prot(p); return escudo(x.nivel, x.nivel===3&&p.id==="mp" ? "Títulos públicos via MP" : null); }
 const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6","--c7"];
 const SCEN = {
   estavel:{nome:"Juros estáveis",desc:"Selic parada no nível atual",pts:[[0,13.75]],ipca:4.6},
@@ -654,8 +676,8 @@ function reserva(){
 
 function cartaoProtecao(val, men, h, sc, best, cur, atual){
   const f = (perfil.protPct||0)/100;
-  const seguros = liquidos().filter(p=>prot(p).nivel>=2);
-  const seg = byId(perfil.protProd) && prot(byId(perfil.protProd)).nivel>=2 ? byId(perfil.protProd) : byId("tselic");
+  const seguros = liquidos().filter(p=>prot(p).nivel>=4);
+  const seg = byId(perfil.protProd) && prot(byId(perfil.protProd)).nivel>=4 ? byId(perfil.protProd) : byId("tselic");
   const alvo = best.p; // o porto seguro complementa a opção de maior taxa
   const sA = simular(alvo, val*(1-f), men*(1-f), h, sc)[h], sB = simular(seg, val*f, men*f, h, sc)[h];
   const comb = sA.liq + sB.liq;
@@ -694,7 +716,8 @@ function comparar(){
   const c = perfil.comp;
   const filtro = c.filtro;
   let lista = P.filter(p => filtro==="todos" || (filtro==="diaria" ? ["diaria","imediata","d1"].includes(p.liq) : ["mercado","venc"].includes(p.liq)));
-  const res = lista.map(p=>{ const s=simular(p,c.inicial,c.mensal,c.meses,c.cen); const f=s[c.meses]; return {p,s,f,aa:f.inv>0?(Math.pow(f.liq/f.inv,12/c.meses)-1)*100:0}; }).sort((a,b)=>b.f.liq-a.f.liq);
+  const res = lista.map(p=>{ const s=simular(p,c.inicial,c.mensal,c.meses,c.cen); const f=s[c.meses]; return {p,s,f,aa:f.inv>0?(Math.pow(f.liq/f.inv,12/c.meses)-1)*100:0}; })
+    .sort((a,b)=> c.ordem==="protecao" ? (prot(b.p).nivel-prot(a.p).nivel) || (b.f.liq-a.f.liq) : b.f.liq-a.f.liq);
   if (!c.vis) c.vis = res.slice(0,5).map(x=>x.p.id);
   const vis = res.filter(x=>c.vis.includes(x.p.id));
   const atual = byId(perfil.reservaAtual)||byId("poupbb");
@@ -710,6 +733,7 @@ function comparar(){
     </div>
     <div class="row">
       <div class="field" style="flex:2 1 300px"><label>Cenário de juros</label><div class="seg" id="cCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===c.cen}">${v.nome}</button>`).join("")}</div></div>
+      <div class="field" style="flex:1 1 220px"><label>Ordenar por</label><div class="seg" id="cOrd">${[["rendimento","Rendimento"],["protecao","Proteção"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${(c.ordem||"rendimento")===k}">${v}</button>`).join("")}</div></div>
       <div class="field" style="flex:1 1 240px"><label>Liquidez</label><div class="seg" id="cFil">${[["todos","Todos"],["diaria","Diária"],["longo","Longo prazo"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===filtro}">${v}</button>`).join("")}</div></div>
     </div>
     <div class="tiny">${esc(sc.desc)}. IPCA considerado: ${pct(sc.ipca,1)} ao ano.</div>
@@ -722,13 +746,15 @@ function comparar(){
   <div class="card stack">
     <h3>Ranking no mês ${c.meses}</h3>
     <div class="tablewrap"><table>
-      <thead><tr><th>#</th><th>Produto</th><th>Taxa</th><th>Liquidez</th><th class="r">Bruto</th><th class="r">IR</th><th class="r">Líquido</th><th class="r">Ganho</th><th class="r">≈ a.a. líq.</th></tr></thead>
+      <thead><tr><th>#</th><th>Produto</th><th>Proteção</th><th>Taxa</th><th>Liquidez</th><th class="r">Bruto</th><th class="r">IR</th><th class="r">Líquido</th><th class="r">Ganho</th><th class="r">≈ a.a. líq.</th></tr></thead>
       <tbody>${res.map((x,i)=>`<tr class="${i===0?"hl":""}"><td class="num">${i+1}</td>
         <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${x.p.id===atual.id?' <span class="chip accent">atual</span>':""}</td>
+        <td>${protChip(x.p)}</td>
         <td>${taxaTxt(x.p)}</td><td class="small">${esc(x.p.liqTxt)}</td>
         <td class="r num">${brl(x.f.bruto)}</td><td class="r num">${x.f.ir>0?"-"+brl(x.f.ir):"isento"}</td>
         <td class="r num"><b>${brl(x.f.liq)}</b></td><td class="r num">${brl(x.f.liq-x.f.inv)}</td><td class="r num">${pct(x.aa)}</td></tr>`).join("")}</tbody>
     </table></div>
+    <div class="protlegend">${[5,4,3,2,1,0].map(n=>`<div>${escudo(n)}<span class="tiny">${esc(NIVEIS[n].txt)}</span></div>`).join("")}</div>
     <p class="tiny" style="margin:0">Total aportado: ${brl(res[0]?res[0].f.inv:0)}. Prefixados e IPCA+ sem marcação a mercado, ou seja, supondo que você segura até o vencimento.</p>
   </div>
 </section>`;
@@ -810,6 +836,8 @@ function renda(){
 </section>`;
 }
 
+const NIVEL_EMISSOR = {"BTG Pactual":4,"BRB Banco de Brasília":3,"Banco Original (PicPay)":3,"Banco Sicoob":3,"BOCOM BBM":2,"Banco Fibra":2,"Banco Digimais":2,"DM Financeira":1};
+function nivelOferta(o){ if (o.gar==="Tesouro") return 5; if (o.gar!=="FGC") return 0; if (/^Média do mercado/.test(o.emissor)) return 3; return NIVEL_EMISSOR[o.emissor] ?? 2; }
 const TIPOS_TIT = ["todos","LCI","LCA","CDB","Tesouro","LF","CRI","CRA","Debênture"];
 function ofertaComoProduto(o){
   let taxa = o.taxa, data = o.data, fonte = o.fonte;
@@ -844,8 +872,8 @@ function titulos(){
   const dentro = o => o.gar==="FGC" || o.gar==="Tesouro";
   let lista = ofertas.ofertas.filter(o => fil==="todos" || (fil==="regra" ? dentro(o) : !dentro(o)));
   if (tp!=="todos") lista = lista.filter(o => tp==="Debênture" ? o.tipo.startsWith("Debênture") : o.tipo===tp);
-  const av = lista.map(o=>avaliarOferta(o,valor,sc)).sort((a,b)=>b.liqAA-a.liqAA);
-  const garChip = g => g==="Tesouro" ? '<span class="chip good">Tesouro Nacional</span>' : g==="FGC" ? '<span class="chip accent">FGC</span>' : '<span class="chip crit">Sem FGC</span>';
+  const av = lista.map(o=>avaliarOferta(o,valor,sc)).sort((a,b)=> perfil.titOrdem==="protecao" ? (nivelOferta(b.o)-nivelOferta(a.o)) || (b.liqAA-a.liqAA) : b.liqAA-a.liqAA);
+  const garChip = o => escudo(nivelOferta(o), nivelOferta(o)===3 && /^Média/.test(o.emissor) ? "FGC · vários bancos" : null);
   return `<section class="view">
   <div><div class="eyebrow">Outros títulos · para estudar e planejar</div><h2 class="title">LCI, LCA, CRI, CRA, debêntures e Tesouro</h2>
   <p class="lede">Ofertas reais de hoje para comparar com calma. Nada daqui entra na reserva: todos travam o dinheiro até o vencimento ou oscilam de preço.</p>
@@ -853,6 +881,7 @@ function titulos(){
   <div class="card stack">
     <div class="row">
       <div class="field" style="flex:2 1 300px"><label>Garantia</label><div class="seg" id="tFil">${[["regra","Dentro da sua regra"],["fora","Fora da regra"],["todos","Todos"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===fil}">${v}</button>`).join("")}</div></div>
+      <div class="field" style="flex:1 1 200px"><label>Ordenar por</label><div class="seg" id="tOrd">${[["rendimento","Rendimento"],["protecao","Proteção"]].map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${(perfil.titOrdem||"rendimento")===k}">${v}</button>`).join("")}</div></div>
       <div class="field"><label for="tVal">Valor para simular</label><div class="input"><span>R$</span><input id="tVal" type="number" min="100" step="1000" value="${valor}"></div></div>
     </div>
     <div class="legend" id="tTipo">${TIPOS_TIT.map(t=>`<button type="button" data-v="${t}" aria-pressed="${t===tp}">${t==="todos"?"Todos os tipos":t}</button>`).join("")}</div>
@@ -861,7 +890,7 @@ function titulos(){
   </div>
   <div class="stack">
     ${av.length?av.map(x=>{ const o=x.o; return `<div class="card flat stack" style="gap:8px">
-      <div class="pos-head"><div style="min-width:0"><div class="row" style="gap:6px;align-items:center"><span class="chip neutral">${esc(o.tipo)}</span>${garChip(o.gar)}<span class="chip ${o.ir==="isento"?"good":"neutral"}">${o.ir==="isento"?"Isento de IR":"IR "+pct(aliq(x.meses*30.4375)*100,1)}</span></div>
+      <div class="pos-head"><div style="min-width:0"><div class="row" style="gap:6px;align-items:center"><span class="chip neutral">${esc(o.tipo)}</span>${garChip(o)}<span class="chip ${o.ir==="isento"?"good":"neutral"}">${o.ir==="isento"?"Isento de IR":"IR "+pct(aliq(x.meses*30.4375)*100,1)}</span></div>
         <div class="nm" style="margin-top:6px;font-weight:700">${esc(o.emissor)} · <span class="num">${taxaOferta(x.p)}</span></div>
         <div class="tiny">${o.venc?"Vence em "+dBR(o.venc)+" · ":""}${prazoTxt(x.meses)} · ${esc(o.plataforma)}</div></div>
         <div class="val" style="text-align:right"><b class="num" style="font-size:17px">${pct(x.liqAA)}</b><div class="tiny">líquido ao ano</div></div></div>
@@ -873,6 +902,10 @@ function titulos(){
       ${o.obs?`<div class="tiny">${esc(o.obs)}</div>`:""}
       <div>${freshChip({fonte:x.p._fonte,data:x.p._data})} <span class="tiny">${esc(x.p._fonte)}</span></div>
     </div>`;}).join(""):`<div class="card"><p class="muted" style="margin:0">Nenhuma oferta com esses filtros.</p></div>`}
+  </div>
+  <div class="card stack">
+    <h3>Como ler a proteção</h3>
+    <div class="protlegend">${[5,4,3,2,1,0].map(n=>`<div>${escudo(n)}<span class="tiny">${esc(NIVEIS[n].txt)}</span></div>`).join("")}</div>
   </div>
   <div class="card stack">
     <h3>Regras de cada título</h3>
@@ -910,7 +943,7 @@ function carteira(){
   <div class="card stack">
     <div class="pos-list">
     ${av.length?av.map(({x,a})=>`<div class="pos-card">
-      <div class="pos-head"><div><b>${esc(x.nome)}</b> ${x.reserva?'<span class="chip accent">Reserva</span>':""}<div class="tiny">${esc(a.p.inst)} · ${esc(a.p.nome)} · ${taxaTxt(a.p)} · desde ${dBR(x.data)}</div></div>
+      <div class="pos-head"><div><b>${esc(x.nome)}</b> ${x.reserva?'<span class="chip accent">Reserva</span>':""} ${protChip(a.p)}<div class="tiny">${esc(a.p.inst)} · ${esc(a.p.nome)} · ${taxaTxt(a.p)} · desde ${dBR(x.data)}</div></div>
       <button class="btn link" data-del="${esc(x.id)}">Remover</button></div>
       <div class="pos-grid">
         <div><span>Aplicado</span><b>${brl(x.valor,2)}</b></div>
@@ -969,8 +1002,9 @@ function taxas(){
     <div class="row">${ind.map(([k,l,u])=>`<div class="field"><label for="mk-${k}">${l}</label><div class="input"><input id="mk-${k}" data-mk="${k}" type="number" step="0.01" value="${mk[k]}"><span>${u}</span></div></div>`).join("")}</div>
   </div>
   ${grupos.map(([g,f])=>`<div class="card stack"><h3>${g}</h3>
-    <div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Produto</th><th>Taxa</th><th>Fonte</th><th>Situação</th><th class="r">Ajustar</th></tr></thead><tbody>
+    <div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Produto</th><th>Proteção</th><th>Taxa</th><th>Fonte</th><th>Situação</th><th class="r">Ajustar</th></tr></thead><tbody>
     ${P.filter(f).map(p=>{const i=prodInfo(p); return `<tr><td><b>${esc(p.inst==="Tesouro Direto"?p.nome:p.inst)}</b>${p.inst!=="Tesouro Direto"?`<div class="tiny">${esc(p.nome)}</div>`:""}</td>
+      <td>${protChip(p)}</td>
       <td class="num">${taxaTxt(p,i.taxa)}</td><td class="small">${esc(i.fonte)}</td><td>${freshChip(i)}</td>
       <td class="r">${p.tipo==="poup"?'<span class="tiny">regra fixa</span>':`<div class="input" style="display:inline-flex;width:120px"><input data-ov="${p.id}" type="number" step="0.01" value="${i.manual?i.taxa:""}" placeholder="${fmtN(i.taxa,2)}" aria-label="Ajustar taxa de ${esc(p.inst)}"></div>`}</td></tr>`;}).join("")}
     </tbody></table></div></div>`).join("")}
@@ -1003,6 +1037,7 @@ function bind(r){
     on("cMen","input",e=>{c.mensal=num(e.target.value);softRender();});
     on("cPrazo","input",e=>{c.meses=+e.target.value;softRender();});
     document.querySelectorAll("#cCen button").forEach(b=>b.addEventListener("click",()=>{c.cen=b.dataset.v;render();salvar();}));
+    document.querySelectorAll("#cOrd button").forEach(b=>b.addEventListener("click",()=>{c.ordem=b.dataset.v;render();salvar();}));
     document.querySelectorAll("#cFil button").forEach(b=>b.addEventListener("click",()=>{c.filtro=b.dataset.v;c.vis=null;render();salvar();}));
     document.querySelectorAll("#cLeg button").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.id; c.vis=c.vis.includes(id)?c.vis.filter(x=>x!==id):[...c.vis,id]; render(); salvar();}));
     desenharComparador();
@@ -1022,6 +1057,7 @@ function bind(r){
   }
   if (r==="titulos"){
     document.querySelectorAll("#tFil button").forEach(b=>b.addEventListener("click",()=>{perfil.titFiltro=b.dataset.v;render();salvar();}));
+    document.querySelectorAll("#tOrd button").forEach(b=>b.addEventListener("click",()=>{perfil.titOrdem=b.dataset.v;render();salvar();}));
     document.querySelectorAll("#tTipo button").forEach(b=>b.addEventListener("click",()=>{perfil.titTipo=b.dataset.v;render();salvar();}));
     document.querySelectorAll("#tCen button").forEach(b=>b.addEventListener("click",()=>{perfil.titCen=b.dataset.v;render();salvar();}));
     on("tVal","input",e=>{perfil.titValor=Math.max(num(e.target.value),1);softRender();});
