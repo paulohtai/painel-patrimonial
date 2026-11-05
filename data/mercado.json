@@ -1,25 +1,76 @@
 {
-  "atualizadoEm": "2026-11-05T14:30-03:00",
-  "fonte": "Copom 04/11, Tesouro Direto 03/11, Focus 03/11",
+  "atualizadoEm": "2026-11-05T14:49-03:00",
+  "fonte": "Banco Central (SGS e Focus) e Tesouro Transparente",
   "selic": 13.75,
   "cdi": 13.65,
-  "ipca12m": 4.57,
+  "ipca12m": 4.58,
   "ipcaRef": "set/26",
   "focusIpca": 5.22,
   "focusSelic": 13.5,
   "focusAno": 2026,
-  "tr": 0.15,
+  "tr": 0.1696,
   "proxCopom": "09/12",
   "ata": "10/11",
   "notasRef": "novembro de 2026",
   "notas": [
-    {"t": "juros", "x": "Copom manteve a Selic em 13,75% em 04/11, por unanimidade, e interrompeu a sequência de cinco cortes iniciada em março."},
-    {"t": "risco", "x": "Após o segundo turno, a preocupação com as contas públicas abriu as taxas do Tesouro: prefixados acima de 15% e IPCA+ 2032 perto de 8% de juro real."},
-    {"t": "juros", "x": "Focus projeta inflação de 5,22% em 2026 e Selic de 13,50% no fim do ano. Parte dos economistas espera nova manutenção em dezembro."},
-    {"t": "acao", "x": "Reserva de emergência: pós-fixado com liquidez diária. Juros parados por mais tempo favorecem quem está no CDI."},
-    {"t": "acao", "x": "Dinheiro de longo prazo: as taxas atuais do Tesouro são historicamente altas. Entrada gradual, só com dinheiro que pode esperar o vencimento."},
-    {"t": "agenda", "x": "Ata do Copom em 10/11. Próxima reunião em 08 e 09/12."}
+    {
+      "t": "juros",
+      "x": "Copom manteve a Selic em 13,75% em 04/11, por unanimidade, e interrompeu a sequência de cinco cortes iniciada em março."
+    },
+    {
+      "t": "risco",
+      "x": "Após o segundo turno, a preocupação com as contas públicas abriu as taxas do Tesouro: prefixados acima de 15% e IPCA+ 2032 perto de 8% de juro real."
+    },
+    {
+      "t": "juros",
+      "x": "Focus projeta inflação de 5,22% em 2026 e Selic de 13,50% no fim do ano. Parte dos economistas espera nova manutenção em dezembro."
+    },
+    {
+      "t": "acao",
+      "x": "Reserva de emergência: pós-fixado com liquidez diária. Juros parados por mais tempo favorecem quem está no CDI."
+    },
+    {
+      "t": "acao",
+      "x": "Dinheiro de longo prazo: as taxas atuais do Tesouro são historicamente altas. Entrada gradual, só com dinheiro que pode esperar o vencimento."
+    },
+    {
+      "t": "agenda",
+      "x": "Ata do Copom em 10/11. Próxima reunião em 08 e 09/12."
+    }
   ],
-  "produtos": {},
-  "status": {}
+  "produtos": {
+    "tselic": {
+      "taxa": 0.1,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "pre32": {
+      "taxa": 15.38,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "pre29": {
+      "taxa": 14.89,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "ipca40": {
+      "taxa": 7.56,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    },
+    "ipca32": {
+      "taxa": 7.89,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-10-30"
+    }
+  },
+  "status": {
+    "selic": "ok",
+    "cdi": "ok",
+    "ipca": "ok",
+    "tr": "ok",
+    "focus": "falhou: HTTPError",
+    "tesouro": "ok"
+  }
 }
