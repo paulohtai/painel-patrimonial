@@ -170,6 +170,7 @@ th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--in
 td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
 td.r,th.r{text-align:right}
 td.num{white-space:nowrap}
+#cBody td:nth-child(4){min-width:150px}
 tr.hl td{background:color-mix(in srgb,var(--accent-soft) 50%,transparent)}
 .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px}
 
@@ -309,7 +310,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
 
 <footer class="wrap foot">
   <p>Cálculos com IR regressivo aplicado aporte a aporte, IOF nos primeiros 30 dias e custódia da B3 no Tesouro. Títulos prefixados e IPCA+ considerados até o vencimento. Cada taxa mostra a fonte e a data em que foi conferida; confirme no app da instituição antes de aplicar.</p>
-  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.2</span></p>
+  <p>Indicadores: Banco Central (SGS e Focus). Tesouro Direto: Tesouro Transparente. Atualização automática em dias úteis às 8h30 e 19h30. Seus dados pessoais ficam só neste aparelho. <span id="versao">v2.3</span></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -356,10 +357,10 @@ const P = [
   {id:"tselic",nome:"Tesouro Selic 2031",inst:"Tesouro Direto",tipo:"selic",taxa:0.07,liq:"d1",liqTxt:"Mesmo dia se pedir até 13h",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,isencao:10000,cond:"Custódia de 0,20% a.a. sobre o que passar de R$ 10 mil. Resgate em dia útil",fonte:"Tesouro Transparente",data:"2026-10-30",aud:"Taxa atualizada automaticamente"},
   {id:"poupbb",nome:"Poupança",inst:"Banco do Brasil",tipo:"poup",taxa:0,liq:"diaria",liqTxt:"Rende só no aniversário",gar:"FGC",ir:"isento",min:1,cond:"Isenta de IR. Rende uma vez por mês, na data de aniversário de cada depósito; resgatar antes perde o mês",fonte:"regra oficial",data:"2026-11-05"},
   {id:"dm",nome:"CDB pós 2031",inst:"DM Financeira (via Genial)",tipo:"cdi",taxa:121,liq:"venc",liqTxt:"Só no vencimento",gar:"FGC",ir:"reg",min:1000,venc:"2031-11-04",cond:"Sem resgate antes de 04/11/2031",fonte:"Meelion",data:"2026-11-05"},
-  {id:"pre29",nome:"Tesouro Prefixado 2029",inst:"Tesouro Direto",tipo:"pre",taxa:15.19,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2029-01-01",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
-  {id:"pre32",nome:"Tesouro Prefixado 2032",inst:"Tesouro Direto",tipo:"pre",taxa:15.63,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-01-01",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
-  {id:"ipca32",nome:"Tesouro IPCA+ 2032",inst:"Tesouro Direto",tipo:"ipca",taxa:8.03,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-08-15",cond:"Oscila antes do vencimento",fonte:"InvestNews",data:"2026-11-03"},
-  {id:"ipca40",nome:"Tesouro IPCA+ 2040",inst:"Tesouro Direto",tipo:"ipca",taxa:7.54,liq:"mercado",liqTxt:"Diária a preço de mercado",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2040-08-15",cond:"Oscila antes do vencimento",fonte:"InfoMoney",data:"2026-10-29"}
+  {id:"pre29",nome:"Tesouro Prefixado 2029",inst:"Tesouro Direto",tipo:"pre",taxa:15.19,liq:"mercado",liqTxt:"Taxa garantida só no vencimento",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2029-01-01",cond:"A taxa só é garantida se você levar até o vencimento. Dá para vender antes, mas pelo preço do dia, que pode dar lucro ou prejuízo",fonte:"InvestNews",data:"2026-11-03"},
+  {id:"pre32",nome:"Tesouro Prefixado 2032",inst:"Tesouro Direto",tipo:"pre",taxa:15.63,liq:"mercado",liqTxt:"Taxa garantida só no vencimento",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-01-01",cond:"A taxa só é garantida se você levar até o vencimento. Dá para vender antes, mas pelo preço do dia, que pode dar lucro ou prejuízo",fonte:"InvestNews",data:"2026-11-03"},
+  {id:"ipca32",nome:"Tesouro IPCA+ 2032",inst:"Tesouro Direto",tipo:"ipca",taxa:8.03,liq:"mercado",liqTxt:"Taxa garantida só no vencimento",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2032-08-15",cond:"A taxa só é garantida se você levar até o vencimento. Dá para vender antes, mas pelo preço do dia, que pode dar lucro ou prejuízo",fonte:"InvestNews",data:"2026-11-03"},
+  {id:"ipca40",nome:"Tesouro IPCA+ 2040",inst:"Tesouro Direto",tipo:"ipca",taxa:7.54,liq:"mercado",liqTxt:"Taxa garantida só no vencimento",gar:"Tesouro Nacional",ir:"reg",min:30,custodia:0.2,venc:"2040-08-15",cond:"A taxa só é garantida se você levar até o vencimento. Dá para vender antes, mas pelo preço do dia, que pode dar lucro ou prejuízo",fonte:"InfoMoney",data:"2026-10-29"}
 ];
 /* Proteção: escala de 0 a 5.
    5 Tesouro Nacional direto | 4 FGC em banco grande | 3 FGC em banco digital grande, ou títulos públicos via instituição de pagamento
@@ -389,6 +390,14 @@ const NIVEIS = {
 const prot = p => PROT[p.id] || {cong:p.inst,porte:"",nivel:2};
 const FGC_LIM = 250000, FGC_TETO = 1000000;
 function escudo(nivel, rotulo){ const n=NIVEIS[nivel]; return `<span class="shield ${n.cls}" title="${esc(n.txt)}"><span class="bars" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=nivel?"on":""}"></i>`).join("")}</span>${esc(rotulo||n.rot)}<span class="sr"> (proteção ${nivel} de 5)</span></span>`; }
+function avisoVenc(p, meses){
+  if (!p.venc || !["mercado","venc"].includes(p.liq)) return "";
+  const mv = mesesAte(p.venc), d = dBR(p.venc).slice(0,6)+new Date(p.venc+"T12:00:00").getFullYear();
+  if (meses!=null && mv <= meses) return `<span class="chip good" title="O prazo simulado passa do vencimento: a taxa contratada está garantida">Vence em ${d}: taxa garantida</span>`;
+  return p.liq==="venc"
+    ? `<span class="chip crit" title="Não há resgate antes do vencimento">Sem resgate antes de ${d}</span>`
+    : `<span class="chip warn" title="Antes do vencimento, o resgate é pelo preço de mercado do dia e pode dar prejuízo">Antes de ${d}, só a preço de mercado</span>`;
+}
 function protChip(p){ const x=prot(p); return escudo(x.nivel, x.nivel===3&&(p.id==="mp"||p.id==="mpmeli") ? "Títulos públicos via MP" : null); }
 const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6","--c7"];
 const SCEN = {
@@ -871,7 +880,8 @@ function comparar(){
       <tbody id="cBody"></tbody>
     </table></div>
     <div class="protlegend">${[5,4,3,2,1,0].map(n=>`<div>${escudo(n)}<span class="tiny">${esc(NIVEIS[n].txt)}</span></div>`).join("")}</div>
-    <p class="tiny" style="margin:0">Prefixados e IPCA+ considerados até o vencimento, sem marcação a mercado. "Em dinheiro de hoje" divide o valor final pela inflação acumulada do cenário.</p>
+    <div class="callout small" id="cAvisoVenc"><b>Tesouro Prefixado, Tesouro IPCA+ e CDB de prazo:</b> o valor da tabela assume que a taxa contratada vale até o fim. Ela só é garantida no vencimento. Se você precisar do dinheiro antes, o Tesouro recompra o título pelo preço do dia, que pode ser menor que o projetado. No CDB de prazo da DM Financeira não existe resgate antes do vencimento.</div>
+    <p class="tiny" style="margin:0">"Em dinheiro de hoje" divide o valor final pela inflação acumulada do cenário.</p>
   </div>
 </section>`;
 }
@@ -930,7 +940,7 @@ function pintarComparador(){
   if (body){
     const atual = byId(perfil.reservaAtual);
     body.innerHTML = res.map((x,i)=>`<tr class="${x.p.id===foco.p.id?"hl":""}"><td class="num">${i+1}</td>
-      <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${atual&&x.p.id===atual.id?' <span class="chip accent">atual</span>':""}</td>
+      <td><span class="sw" style="background:var(${COLORS[i%COLORS.length]})"></span><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${atual&&x.p.id===atual.id?' <span class="chip accent">atual</span>':""}${avisoVenc(x.p,c.meses)?`<div style="margin-top:4px">${avisoVenc(x.p,c.meses)}</div>`:""}</td>
       <td>${protChip(x.p)}</td><td>${taxaTxt(x.p)}</td>
       <td class="r num">${brl(x.f.inv)}</td><td class="r num">${x.f.ir>0?"-"+brl(x.f.ir):"isento"}</td>
       <td class="r num"><b>${brl(x.f.liq)}</b></td><td class="r num">${brl(x.f.liq/def)}</td><td class="r num">${pct(x.aa)}</td></tr>`).join("");
@@ -1021,7 +1031,7 @@ function metas(){
     <div class="tablewrap"><table>
       <thead><tr><th>#</th><th>Produto</th><th>Proteção</th><th>Taxa</th><th>Chega em</th><th class="r">Tempo</th><th class="r">Você aporta</th><th class="r">Juros</th><th class="r">Aporte para ${prazo/12} anos</th></tr></thead>
       <tbody>${res.map((x,i)=>`<tr class="${best&&x.p.id===best.p.id?"hl":""}"><td class="num">${i+1}</td>
-        <td><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${ref&&x.p.id===ref.p.id?' <span class="chip accent">atual</span>':""}</td>
+        <td><b>${esc(rotulo(x.p))}</b>${rotulo(x.p)===x.p.inst?`<span class="muted"> · ${esc(x.p.nome)}</span>`:""}${ref&&x.p.id===ref.p.id?' <span class="chip accent">atual</span>':""}${avisoVenc(x.p,x.m)?`<div style="margin-top:4px">${avisoVenc(x.p,x.m)}</div>`:""}</td>
         <td>${protChip(x.p)}</td><td>${taxaTxt(x.p)}</td>
         <td>${x.m!=null?chegada(x.m):"não chega em 50 anos"}</td>
         <td class="r num">${x.m!=null?(x.m/12).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" anos":"—"}</td>
@@ -1057,6 +1067,7 @@ function renda(){
         <div class="kpi"><span>Taxa líquida</span><b>${pct(liqA)}</b></div>
         <div class="kpi"><span>Ganho real</span><b>${pct(realA)}</b></div>
       </div>
+      ${["mercado","venc"].includes(p.liq)?`<div class="callout small">${esc(rotulo(p))} só garante a taxa no vencimento (${dBR(p.venc)}). Para viver de renda com ele, compre e leve até o fim; vender antes sai pelo preço do dia.</div>`:""}
       <div class="callout info small">A diferença entre os dois valores, ${brl(nomM-realM)} por mês, deve ser reaplicada para repor a inflação de ${pct(ipcaP,1)} ao ano.</div>
     </div>
     <div class="card stack">
@@ -1129,8 +1140,9 @@ function titulos(){
       <div class="pos-grid">
         <div><span>${brl(valor)} viram</span><b>${brl(x.fim.liq)}</b></div>
         <div><span>Ganho líquido</span><b style="color:var(--good)">${brl(x.fim.liq-valor)}</b></div>
-        ${x.eqCDB?`<div><span>Equivale a CDB de</span><b>${fmtN(x.eqCDB,0)}% do CDI</b></div>`:`<div><span>Liquidez</span><b>${o.tipo==="Tesouro"?"diária a mercado":"no vencimento"}</b></div>`}
+        ${x.eqCDB?`<div><span>Equivale a CDB de</span><b>${fmtN(x.eqCDB,0)}% do CDI</b></div>`:`<div><span>Resgate</span><b>${o.tipo==="Tesouro"?"taxa garantida só no vencimento":"só no vencimento"}</b></div>`}
       </div>
+      ${o.tipo==="Tesouro"?`<div class="callout small">Dá para vender antes de ${dBR(x.p.venc)}, mas pelo preço do dia, que pode ser menor que o valor aplicado. O resultado acima só vale se você levar até o vencimento.</div>`:(o.gar!=="Tesouro"&&!o.prazoMeses&&o.tipo!=="LF"&&o.venc)?`<div class="tiny">Sem resgate antes de ${dBR(o.venc)}.</div>`:""}
       ${o.obs?`<div class="tiny">${esc(o.obs)}</div>`:""}
       <div>${freshChip({fonte:x.p._fonte,data:x.p._data})} <span class="tiny">${esc(x.p._fonte)}</span></div>
     </div>`;}).join(""):`<div class="card"><p class="muted" style="margin:0">Nenhuma oferta com esses filtros.</p></div>`}
@@ -1237,7 +1249,7 @@ function taxas(){
     <div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Produto</th><th>Proteção</th><th>Taxa</th><th>Fonte</th><th>Situação</th><th class="r">Ajustar</th></tr></thead><tbody>
     ${P.filter(f).map(p=>{const i=prodInfo(p); return `<tr><td><b>${esc(p.inst==="Tesouro Direto"?p.nome:p.inst)}</b>${p.inst!=="Tesouro Direto"?`<div class="tiny">${esc(p.nome)}</div>`:""}</td>
       <td>${protChip(p)}</td>
-      <td class="num">${taxaTxt(p,i.taxa)}</td><td class="small">${esc(i.fonte)}${p.aud?`<div class="tiny">${esc(p.aud)}</div>`:""}${p.teto?`<div class="tiny">Teto ${brl(p.teto)}; acima rende ${p.base||100}% do CDI</div>`:""}</td><td>${freshChip(i)}</td>
+      <td class="num">${taxaTxt(p,i.taxa)}</td><td class="small">${avisoVenc(p)?avisoVenc(p)+"<br>":""}${esc(i.fonte)}${p.aud?`<div class="tiny">${esc(p.aud)}</div>`:""}${p.teto?`<div class="tiny">Teto ${brl(p.teto)}; acima rende ${p.base||100}% do CDI</div>`:""}</td><td>${freshChip(i)}</td>
       <td class="r">${p.tipo==="poup"?'<span class="tiny">regra fixa</span>':`<div class="input" style="display:inline-flex;width:120px"><input data-ov="${p.id}" type="number" step="0.01" value="${i.manual?i.taxa:""}" placeholder="${fmtN(i.taxa,2)}" aria-label="Ajustar taxa de ${esc(p.inst)}"></div>`}</td></tr>`;}).join("")}
     </tbody></table></div></div>`).join("")}
   <div class="row"><button class="btn ghost" id="resetOv">Desfazer meus ajustes</button></div>
