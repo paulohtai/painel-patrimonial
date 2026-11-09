@@ -301,6 +301,7 @@ footer.foot{padding-block:24px 40px;color:var(--ink-3);font-size:12px;border-top
       <a href="#comparar">Comparador</a>
       <a href="#metas">Metas</a>
       <a href="#renda">Renda passiva</a>
+      <a href="#horizonte">18 meses</a>
       <a href="#titulos">Outros títulos</a>
       <a href="#carteira">Carteira</a>
       <a href="#taxas">Taxas e fontes</a>
@@ -420,7 +421,7 @@ function protChip(p){ const x=prot(p); return escudo(x.nivel, x.nivel===3&&(p.id
 const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6","--c7"];
 const SCEN = {
   estavel:{nome:"Juros estáveis",desc:"Selic parada no nível atual",pts:[[0,13.75]],ipca:4.6},
-  focus:{nome:"Projeção do mercado",desc:"Cortes graduais até cerca de 10,5% em 2028",pts:[[0,13.75],[1,13.5],[13,12.0],[25,10.5],[37,10.0]],ipca:4.6},
+  focus:{nome:"Projeção do mercado",desc:"Focus: Selic de 13,75% no fim de 2026, 12,5% no fim de 2027 e 11% no fim de 2028",pts:[[0,13.75],[1,13.75],[13,12.5],[25,11.0],[37,10.25]],ipca:4.6},
   estresse:{nome:"Estresse fiscal",desc:"Selic sobe para 15% e cede só em 2029",pts:[[0,13.75],[1,13.75],[8,15.0],[25,15.0],[37,13.0],[49,12.0]],ipca:6.0}
 };
 const IOF = [96,93,90,86,83,80,76,73,70,66,63,60,56,53,50,46,43,40,36,33,30,26,23,20,16,13,10,6,3,0];
@@ -561,7 +562,7 @@ async function carregarOfertas(){
   const pega = async u => { try{ const r=await fetch(u+"?t="+Date.now(),{cache:"no-store"}); if(!r.ok) return null; const j=await r.json(); return j&&Array.isArray(j.ofertas)?j:null; }catch(e){ return null; } };
   const res = (await Promise.all(urls.map(pega))).filter(Boolean).sort((a,b)=>new Date(b.atualizadoEm)-new Date(a.atualizadoEm));
   if (res.length){ ofertas = res[0]; ofertasErro=false; } else ofertasErro = true;
-  if (rota()==="titulos") render();
+  if (rota()==="titulos"||rota()==="horizonte") render();
 }
 async function carregarMercado(){
   const pega = async u => { try{ const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"}); if(!r.ok) return null; const j=await r.json(); return j&&j.selic?j:null; }catch(e){ return null; } };
@@ -584,7 +585,7 @@ function setStatus(){
 }
 
 /* ===================== VIEWS ===================== */
-const VIEWS = {painel, reserva, comparar, metas, renda, titulos, carteira, taxas};
+const VIEWS = {painel, reserva, comparar, metas, renda, horizonte, titulos, carteira, taxas};
 function rota(){ const h=(location.hash||"#painel").slice(1); return VIEWS[h]?h:"painel"; }
 function render(){
   setStatus();
@@ -1097,7 +1098,7 @@ function renda(){
 </section>`;
 }
 
-const NIVEL_EMISSOR = {"BTG Pactual":4,"BRB Banco de Brasília":3,"Banco Original (PicPay)":3,"Banco Sicoob":3,"BOCOM BBM":2,"Banco Fibra":2,"Banco Digimais":2,"DM Financeira":1};
+const NIVEL_EMISSOR = {"BTG Pactual":4,"BRB Banco de Brasília":1,"Banco Original (PicPay)":3,"Banco Sicoob":3,"BOCOM BBM":2,"Banco Fibra":2,"Banco Digimais":2,"DM Financeira":1};
 function nivelOferta(o){ if (o.gar==="Tesouro") return 5; if (o.gar!=="FGC") return 0; if (/^Média do mercado/.test(o.emissor)) return 3; return NIVEL_EMISSOR[o.emissor] ?? 2; }
 const TIPOS_TIT = ["todos","LCI","LCA","CDB","Tesouro","LF","CRI","CRA","Debênture"];
 function ofertaComoProduto(o){
@@ -1134,7 +1135,7 @@ function titulos(){
   let lista = ofertas.ofertas.filter(o => fil==="todos" || (fil==="regra" ? dentro(o) : !dentro(o)));
   if (tp!=="todos") lista = lista.filter(o => tp==="Debênture" ? o.tipo.startsWith("Debênture") : o.tipo===tp);
   const av = lista.map(o=>avaliarOferta(o,valor,sc)).sort((a,b)=> perfil.titOrdem==="protecao" ? (nivelOferta(b.o)-nivelOferta(a.o)) || (b.liqAA-a.liqAA) : b.liqAA-a.liqAA);
-  const garChip = o => escudo(nivelOferta(o), nivelOferta(o)===3 && /^Média/.test(o.emissor) ? "FGC · vários bancos" : null);
+  const garChip = o => escudo(nivelOferta(o), nivelOferta(o)===3 && /^Média/.test(o.emissor) ? "FGC · vários bancos" : /^BRB/.test(o.emissor) ? "FGC · crédito fraco" : null);
   return `<section class="view">
   <div><div class="eyebrow">Outros títulos · para estudar e planejar</div><h2 class="title">LCI, LCA, CRI, CRA, debêntures e Tesouro</h2>
   <p class="lede">Ofertas reais de hoje para comparar com calma. Nada daqui entra na reserva: todos travam o dinheiro até o vencimento ou oscilam de preço.</p>
@@ -1172,6 +1173,125 @@ function titulos(){
   <div class="card stack">
     <h3>Regras de cada título</h3>
     <ul class="notes">${(ofertas.regras||[]).map(r=>`<li><span class="tag agenda">${esc(r.t)}</span><span class="small">${esc(r.x)}</span></li>`).join("")}</ul>
+  </div>
+</section>`;
+}
+
+/* ===================== HORIZONTE (dinheiro que pode esperar) =====================
+   Candidatos e análise de crédito vêm de data/ofertas.json, bloco "horizonte".
+   Só entram papéis com FGC ou Tesouro e emissor aprovado no filtro de crédito. */
+function hzProduto(c){
+  if (c.o){ const p = ofertaComoProduto(c.o); return p; }
+  return byId(c.produto) || null;
+}
+function hzCredito(c){ return (ofertas.horizonte.emissores||{})[c.credito] || {nota:"Sem avaliação",classe:"neutral"}; }
+function hzCalc(p, valor, H, sc){
+  const vm = mesesAte(p.venc);
+  if (vm <= H){ // vence antes do prazo: o resgate é reaplicado a 100% do CDI, com IR sobre esse novo período
+    const k = Math.max(1, Math.floor(vm));
+    const v1 = simular(p, valor, 0, k, sc)[k].liq;
+    let bruto = v1; for (let m=k; m<H; m++) bruto *= Math.pow(1+cdiAt(m,sc)/100, 1/12);
+    return {liq: v1 + (bruto-v1)*(1-(H>k?aliq((H-k)*30.4375):0)), f:null, status:"vence", k};
+  }
+  const f = simular(p, valor, 0, H, sc)[H];
+  // no estresse, quem precisa vender antes do vencimento encontra taxa 1 p.p. mais alta
+  const venda = (sc==="estresse" && isFinite(vm) && p.tipo==="pre") ? vendaMercado(Object.assign({},p,{liq:"mercado"}),f,H,1) : null;
+  return {liq: venda ?? f.liq, f, status: isFinite(vm) ? "depois" : "livre", k:null};
+}
+function hzAvaliar(c, valor, H, sc){
+  const p = hzProduto(c); if (!p) return null;
+  const r = hzCalc(p, valor, H, sc);
+  const aa = (Math.pow(r.liq/valor, 12/H)-1)*100;
+  const tesouro = c.o ? c.o.tipo==="Tesouro" : p.gar==="Tesouro Nacional";
+  const trava = r.status==="depois" && !tesouro;
+  let mtm = null;
+  if (r.status==="depois" && tesouro){
+    const pm = Object.assign({}, p, {liq:"mercado"});
+    mtm = {cai:vendaMercado(pm,r.f,H,-1), sobe:vendaMercado(pm,r.f,H,1), sobe2:vendaMercado(pm,r.f,H,2), resta:mesesAte(p.venc)-H};
+  }
+  const info = c.o ? {fonte:p._fonte, data:p._data} : prodInfo(p);
+  return {c, p, r, aa, trava, tesouro, mtm, info, cred:hzCredito(c)};
+}
+function hzTaxa(x){
+  if (x.c.o) return taxaOferta(x.p);
+  return taxaTxt(x.p, x.info.taxa);
+}
+function hzNome(x){ return x.c.o ? (x.c.o.tipo==="Tesouro" ? x.c.o.emissor : x.c.o.tipo+" "+x.c.o.emissor) : (x.p.nome===x.p.inst ? x.p.nome : x.p.nome+" · "+x.p.inst); }
+function hzCarteira(valor, H, sc){
+  const itens = (ofertas.horizonte.carteira||[]).map(i=>{
+    const c = ofertas.horizonte.candidatos.find(k=>k.id===i.id); if(!c) return null;
+    const v = valor*i.pct/100, x = hzAvaliar(c, v, H, sc); return x && {i, v, x};
+  }).filter(Boolean);
+  return {itens, liq:itens.reduce((s,t)=>s+t.x.r.liq,0)};
+}
+function horizonte(){
+  const valor = perfil.hzValor||32000, H = perfil.hzMeses||18, sc = perfil.hzCen||"focus";
+  const head = `<div><div class="eyebrow">Dinheiro que pode esperar</div><h2 class="title">Melhores opções para o seu prazo</h2>`;
+  if (!ofertas || !ofertas.horizonte) return `<section class="view">${head}</div><div class="card"><p class="muted" style="margin:0">${ofertasErro?"Não foi possível carregar a análise agora. Verifique a internet e abra esta tela de novo.":"Carregando análise..."}</p></div></section>`;
+  const hz = ofertas.horizonte;
+  const av = hz.candidatos.map(c=>hzAvaliar(c,valor,H,sc)).filter(Boolean)
+    .sort((a,b)=>(a.trava-b.trava)||(b.r.liq-a.r.liq));
+  const poup = simular(byId("poupbb"),valor,0,H,sc)[H].liq;
+  const cart = hzCarteira(valor,H,sc);
+  const cenCart = Object.keys(SCEN).map(k=>({k,nome:SCEN[k].nome,liq:hzCarteira(valor,H,k).liq}));
+  const statusChip = x => {
+    const d = x.p.venc ? dBR(x.p.venc).slice(0,6)+new Date(x.p.venc+"T12:00:00").getFullYear() : "";
+    if (x.r.status==="livre") return `<span class="chip good">Resgate quando quiser</span>`;
+    if (x.r.status==="vence") return `<span class="chip good" title="Vence antes do prazo; o valor é reaplicado a 100% do CDI até o fim">Vence em ${d}, antes do prazo</span>`;
+    if (x.trava) return `<span class="chip crit" title="Não há resgate antes do vencimento">Trava até ${d}, depois do prazo</span>`;
+    return `<span class="chip warn" title="Pode vender antes do vencimento pelo preço do dia">Venda a mercado; vence em ${d}</span>`;
+  };
+  return `<section class="view">
+  ${head}
+  <p class="lede">Análise para deixar o dinheiro aplicado por ${esc(duracaoTxt(H))}, só com Tesouro ou FGC e só em emissores que passaram no filtro de crédito.</p>
+  <p class="tiny" style="margin:6px 0 0">Análise de ${dBR(hz.atualizadoEm)}. ${esc(hz.premissa||"")}</p></div>
+  <div class="card stack">
+    <div class="row">
+      <div class="field"><label for="hVal">Valor</label><div class="input"><span>R$</span><input id="hVal" type="number" min="1000" step="1000" value="${valor}"></div></div>
+      <div class="field" style="flex:1 1 220px"><label>Prazo</label><div class="seg" id="hPrazo">${[12,18,24].map(m=>`<button type="button" data-v="${m}" aria-pressed="${m===H}">${m} meses</button>`).join("")}</div></div>
+    </div>
+    <div class="field"><label>Cenário de juros</label><div class="seg" id="hCen">${Object.entries(SCEN).map(([k,v])=>`<button type="button" data-v="${k}" aria-pressed="${k===sc}">${v.nome}</button>`).join("")}</div>
+    <p class="tiny" style="margin:6px 0 0">${esc(SCEN[sc].desc)}</p></div>
+  </div>
+  <div class="card stack">
+    <h3>${esc(hz.carteiraTitulo||"Composição para estudo")}</h3>
+    <div class="kpis">
+      <div class="kpi"><span>Aplicado</span><b>${brl(valor)}</b></div>
+      <div class="kpi"><span>Líquido em ${H} meses</span><b>${brl(cart.liq)}</b></div>
+      <div class="kpi"><span>Na Poupança BB</span><b>${brl(poup)}</b></div>
+      <div class="kpi"><span>Diferença</span><b style="color:var(--good)">${brl(cart.liq-poup)}</b></div>
+    </div>
+    <div class="stack" style="gap:6px">${cart.itens.map(t=>`<div class="row" style="justify-content:space-between;gap:8px;align-items:baseline"><span class="small"><b class="num">${t.i.pct}%</b> ${esc(hzNome(t.x))}<span class="tiny"> · ${esc(t.i.papel||"")}</span></span><b class="num small">${brl(t.v)}</b></div>`).join("")}</div>
+    <div class="pos-grid">${cenCart.map(c=>`<div><span>${esc(c.nome)}</span><b>${brl(c.liq)}</b></div>`).join("")}</div>
+    ${hz.carteiraNota?`<div class="callout small">${esc(hz.carteiraNota)}</div>`:""}
+    <p class="tiny" style="margin:0">Exercício para estudo, não recomendação de compra. O Prefixado usa a taxa contratada; no estresse, considera venda com taxa 1 p.p. mais alta.</p>
+  </div>
+  <div class="stack">
+    <h3 style="margin:0">Opções aprovadas, da melhor para a pior neste cenário</h3>
+    ${av.map((x,i)=>`<div class="card flat stack" style="gap:8px">
+      <div class="pos-head"><div style="min-width:0">
+        <div class="row" style="gap:6px;align-items:center"><span class="chip neutral">${i+1}º</span><span class="chip ${x.cred.classe==="soberano"||x.cred.classe==="alto"?"good":"neutral"}" title="${esc(x.cred.txt||"")}">${esc(x.cred.nota)}</span><span class="chip ${x.p.ir==="isento"?"good":"neutral"}">${x.p.ir==="isento"?"Isento de IR":"IR regressivo"}</span>${statusChip(x)}</div>
+        <div class="nm" style="margin-top:6px;font-weight:700">${esc(hzNome(x))} · <span class="num">${hzTaxa(x)}</span></div>
+        <div class="tiny">${esc(x.c.onde||"")}</div></div>
+        <div class="val" style="text-align:right"><b class="num" style="font-size:17px">${pct(x.aa)}</b><div class="tiny">líquido ao ano</div></div></div>
+      <div class="pos-grid">
+        <div><span>${brl(valor)} viram</span><b>${brl(x.r.liq)}</b></div>
+        <div><span>Ganho líquido</span><b style="color:var(--good)">${brl(x.r.liq-valor)}</b></div>
+        <div><span>Sobre a poupança</span><b>${brl(x.r.liq-poup)}</b></div>
+      </div>
+      ${x.c.tese?`<div class="small">${esc(x.c.tese)}</div>`:""}
+      ${x.mtm?`<div class="mtm"><b>Se vender em ${dataMes(H)}</b>, faltando ${fmtN(x.mtm.resta,0)} meses: <span class="num">${brl(x.r.f.liq)}</span> se a taxa não mudar · <span class="num up">${brl(x.mtm.cai)}</span> se cair 1 p.p. · <span class="num down">${brl(x.mtm.sobe)}</span> se subir 1 p.p. · <span class="num down">${brl(x.mtm.sobe2)}</span> se subir 2 p.p.</div>`:""}
+      ${x.trava?`<div class="callout small">Não dá para resgatar em ${dataMes(H)}. O valor acima é só a referência da curva; o dinheiro fica preso até ${dBR(x.p.venc)}.</div>`:""}
+      <div>${freshChip(x.info)} <span class="tiny">${esc(x.info.fonte||"")}${x.cred.fonte?" · Crédito: "+esc(x.cred.fonte)+(x.cred.quando?" ("+esc(x.cred.quando)+")":""):""}</span></div>
+    </div>`).join("")}
+  </div>
+  <div class="card stack">
+    <h3>O que ficou de fora e por quê</h3>
+    <ul class="notes">${(hz.fora||[]).map(f=>`<li><span class="tag risco">${esc(f.t)}</span><span class="small">${esc(f.x)}${f.fonte?` <span class="tiny">(${esc(f.fonte)})</span>`:""}</span></li>`).join("")}</ul>
+  </div>
+  <div class="card stack">
+    <h3>Como esta análise foi feita</h3>
+    <ul class="notes">${(hz.metodo||[]).map(t=>`<li><span class="small">${esc(t)}</span></li>`).join("")}</ul>
   </div>
 </section>`;
 }
@@ -1350,6 +1470,11 @@ function bind(r){
     document.querySelectorAll("#tTipo button").forEach(b=>b.addEventListener("click",()=>{perfil.titTipo=b.dataset.v;render();salvar();}));
     document.querySelectorAll("#tCen button").forEach(b=>b.addEventListener("click",()=>{perfil.titCen=b.dataset.v;render();salvar();}));
     on("tVal","input",e=>{perfil.titValor=Math.max(num(e.target.value),1);softRender();});
+  }
+  if (r==="horizonte"){
+    document.querySelectorAll("#hPrazo button").forEach(b=>b.addEventListener("click",()=>{perfil.hzMeses=+b.dataset.v;render();salvar();}));
+    document.querySelectorAll("#hCen button").forEach(b=>b.addEventListener("click",()=>{perfil.hzCen=b.dataset.v;render();salvar();}));
+    on("hVal","input",e=>{perfil.hzValor=Math.max(num(e.target.value),1);softRender();});
   }
   if (r==="carteira"){
     document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{perfil.posicoes=perfil.posicoes.filter(x=>x.id!==b.dataset.del);render();salvar();}));

@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-11-09T09:00-03:00",
+  "atualizadoEm": "2026-11-09T11:45-03:00",
   "fonte": "Rankings diários do Meelion (05/11 e 09/11/2026), InfoMoney (06/11/2026; médias de LCI e LCA, 23/07/2026) e Tesouro Transparente",
   "regras": [
     {"t": "LCI e LCA", "x": "Isentas de IR para pessoa física e cobertas pelo FGC. Prazo mínimo de 6 meses (CDI ou pré); com IPCA, 36 meses na LCI e 12 meses na LCA. Não dá para resgatar antes do vencimento."},
@@ -10,9 +10,198 @@
     {"t": "Tributação", "x": "A proposta de cobrar 5% de IR sobre isentos (MP 1.303) caducou em outubro de 2025. Em 28/10/2026, O Globo informou que o governo estuda cobrar IOF sobre LCI, LCA, CRI, CRA e debêntures incentivadas, medida possível por decreto; não há proposta formal nem alíquota anunciada. Papéis já comprados tendem a manter a isenção."},
     {"t": "FGC", "x": "Cobre até R$ 250 mil por CPF e por instituição ou conglomerado, com teto global de R$ 1 milhão a cada 4 anos. As regras do CMN em vigor desde 1º de junho de 2026 limitam o uso da garantia pelos bancos e não mudam esses limites. Em 05/11/2026 o FGC confirmou acesso indevido a dados pessoais de investidores; a cobertura não mudou, mas vale desconfiar de contatos que usem seus dados."}
   ],
+  "horizonte": {
+    "atualizadoEm": "2026-11-09",
+    "premissa": "Selic 13,75%, CDI 13,65%. Só Tesouro ou FGC, com emissor aprovado no filtro de crédito. Valores estimados, antes de confirmar na corretora.",
+    "carteiraTitulo": "Composição para estudo",
+    "carteira": [
+      {
+        "id": "hz-pre29",
+        "pct": 50,
+        "papel": "trava a taxa contra cortes de juros"
+      },
+      {
+        "id": "hz-bv",
+        "pct": 50,
+        "papel": "resgate livre, para o caso de precisar antes"
+      }
+    ],
+    "emissores": {
+      "Tesouro": {
+        "nota": "Tesouro Nacional",
+        "classe": "soberano",
+        "txt": "Risco soberano, sem depender de banco"
+      },
+      "BTG": {
+        "nota": "AAA.br · BTG Pactual",
+        "classe": "alto",
+        "txt": "Rating de emissor e depósitos de longo prazo, perspectiva estável",
+        "fonte": "Moody's Local",
+        "quando": "jun/2025"
+      },
+      "Daycoval": {
+        "nota": "AA+ · Daycoval",
+        "classe": "alto",
+        "txt": "Fitch AA+(bra), Moody's AA+.br e S&P brAA+ com perspectiva positiva",
+        "fonte": "RI Daycoval",
+        "quando": "jun/2026"
+      },
+      "BV": {
+        "nota": "AA+.br · BV",
+        "classe": "alto",
+        "txt": "Perspectiva estável. Riscos: concentração em veículos usados e ativos problemáticos em alta",
+        "fonte": "Moody's Local",
+        "quando": "jul/2026"
+      }
+    },
+    "candidatos": [
+      {
+        "id": "hz-pre29",
+        "credito": "Tesouro",
+        "onde": "Tesouro Direto, em qualquer corretora habilitada",
+        "tese": "Trava cerca de 14,7% ao ano sem risco de banco e vence só 7 a 8 meses depois do prazo, então a oscilação na venda é pequena. Ganha do CDI se os cortes previstos acontecerem e perde se os juros subirem.",
+        "o": {
+          "id": "hz-pre29",
+          "tipo": "Tesouro",
+          "emissor": "Tesouro Prefixado 2029",
+          "plataforma": "Tesouro Direto",
+          "idx": "pre",
+          "taxa": 14.71,
+          "venc": "2029-01-01",
+          "ir": "reg",
+          "gar": "Tesouro",
+          "custodia": 0.2,
+          "fonte": "InvestNews",
+          "data": "2026-11-09",
+          "auto": "pre29"
+        }
+      },
+      {
+        "id": "hz-lcabtg27",
+        "credito": "BTG",
+        "onde": "Banco Genial · mínimo de R$ 1.000 · só no vencimento",
+        "tese": "Melhor combinação encontrada de emissor forte, isenção e prazo. Vence em 13 meses, antes da sua data. A partir daí o valor volta para liquidez ou para uma nova aplicação; aqui foi considerado 100% do CDI.",
+        "o": {
+          "id": "hz-lcabtg27",
+          "tipo": "LCA",
+          "emissor": "BTG Pactual",
+          "plataforma": "Banco Genial",
+          "idx": "cdi",
+          "taxa": 93,
+          "venc": "2027-12-16",
+          "ir": "isento",
+          "gar": "FGC",
+          "fonte": "Meelion",
+          "data": "2026-11-09"
+        }
+      },
+      {
+        "id": "hz-lcaday27",
+        "credito": "Daycoval",
+        "onde": "Banco Daycoval · só no vencimento",
+        "tese": "Prefixada e isenta por 12 meses. Boa para travar taxa com banco bem avaliado, mas paga menos que a do BTG se os juros caírem devagar.",
+        "o": {
+          "id": "hz-lcaday27",
+          "tipo": "LCA",
+          "emissor": "Banco Daycoval",
+          "plataforma": "Banco Daycoval",
+          "idx": "pre",
+          "taxa": 12.4,
+          "venc": "2027-11-05",
+          "ir": "isento",
+          "gar": "FGC",
+          "fonte": "Meelion",
+          "data": "2026-11-05"
+        }
+      },
+      {
+        "id": "hz-lcaday28",
+        "credito": "Daycoval",
+        "onde": "Banco Daycoval · só no vencimento",
+        "tese": "Boa taxa e emissor bem avaliado, mas vence 6 meses depois da sua data. Só faz sentido se você tiver certeza de que não precisa do dinheiro antes de novembro de 2028.",
+        "o": {
+          "id": "hz-lcaday28",
+          "tipo": "LCA",
+          "emissor": "Banco Daycoval",
+          "plataforma": "Banco Daycoval",
+          "idx": "cdi",
+          "taxa": 92,
+          "venc": "2028-11-09",
+          "ir": "isento",
+          "gar": "FGC",
+          "fonte": "Meelion",
+          "data": "2026-11-09"
+        }
+      },
+      {
+        "id": "hz-bv",
+        "credito": "BV",
+        "produto": "bv",
+        "onde": "Conta BV · liquidez diária",
+        "tese": "Melhor taxa com resgate livre, de banco bem avaliado. Confirme no app se os 110% seguem valendo: só uma fonte, de outubro, sustenta esse número."
+      },
+      {
+        "id": "hz-dayliq",
+        "credito": "Daycoval",
+        "produto": "daycoval",
+        "onde": "Banco Daycoval · resgate em 1 dia útil · mínimo de R$ 1.000",
+        "tese": "Mantém o dinheiro disponível em banco bem avaliado, com taxa acima de 100% do CDI."
+      },
+      {
+        "id": "hz-selic",
+        "credito": "Tesouro",
+        "produto": "tselic",
+        "onde": "Tesouro Direto · resgate em dia útil",
+        "tese": "Referência de segurança. Quase não oscila e acompanha a Selic, o que protege se os juros subirem."
+      },
+      {
+        "id": "hz-reserva",
+        "credito": "Tesouro",
+        "produto": "treserva",
+        "onde": "App do Banco do Brasil · resgate imediato",
+        "tese": "Mesmo risco do Tesouro Selic, com resgate imediato, e já está no banco onde o seu dinheiro fica hoje."
+      }
+    ],
+    "fora": [
+      {
+        "t": "BRB",
+        "x": "LCIs de 103,5% a 106,5% do CDI são as maiores taxas isentas, mas a S&P rebaixou o banco para brCCC+ e citou risco de liquidação. O último balanço público é de junho de 2025 e o socorro de R$ 6,6 bilhões do FGC estava travado em agosto. O FGC cobre, porém o resgate pode atrasar e a taxa alta paga esse risco.",
+        "fonte": "S&P via Seu Dinheiro, 07/06/2026; Bloomberg Línea, 20/08/2026"
+      },
+      {
+        "t": "DM e Digimais",
+        "x": "CDBs de até 120% ou 123% do CDI têm FGC, mas não confirmamos rating desses emissores. Taxas assim indicam que o mercado cobra mais pelo risco."
+      },
+      {
+        "t": "Banco Original",
+        "x": "O rating AA-.br encontrado é do PicPay Bank, não do Banco Original, que emite a LCA. O grupo também mostra ativos problemáticos em alta, de 6,3% para 12,7% em um ano.",
+        "fonte": "Moody's Local, 06/07/2026"
+      },
+      {
+        "t": "Tesouro IPCA+ 2032",
+        "x": "Paga juro real alto, mas vence mais de 4 anos depois do seu prazo. Vender antes expõe a oscilações grandes de preço."
+      },
+      {
+        "t": "CRI, CRA, debêntures e LF",
+        "x": "Sem FGC e sem Tesouro, fora da sua regra de segurança."
+      },
+      {
+        "t": "Caixinhas com teto",
+        "x": "Turbo, Cofrinhos e similares rendem bem só até R$ 5 mil ou R$ 10 mil. O CDB de 130% da BV também é limitado a R$ 10 mil."
+      }
+    ],
+    "metodo": [
+      "Filtro de garantia: só Tesouro Nacional ou FGC, e R$ 250 mil por emissor.",
+      "Filtro de crédito: emissor com rating nacional AA+ ou melhor, ou Tesouro. Sem rating confirmado, fica de fora mesmo com FGC.",
+      "Prazo: papéis que vencem depois do seu prazo aparecem marcados. LCA e CDB não têm saída antes do vencimento; Tesouro tem, a preço de mercado.",
+      "Resultado: juros do cenário escolhido, IR regressivo, custódia do Tesouro e reaplicação a 100% do CDI, com IR, quando o papel vence antes do prazo.",
+      "No cenário de estresse o Prefixado é vendido com taxa 1 p.p. mais alta. Nos demais cenários, ele é calculado pela taxa contratada, sem ganho de venda."
+    ],
+    "carteiraNota": "A taxa de 110% do BV precisa ser confirmada no app do banco. Se não valer mais, a alternativa nesta lista é a LCA do BTG, que rende um pouco menos e fica presa até dezembro de 2027."
+  },
   "ofertas": [
-    {"id": "lci-brb-28", "tipo": "LCI", "emissor": "BRB Banco de Brasília", "plataforma": "Genial", "idx": "cdi", "taxa": 103.5, "venc": "2028-10-29", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-09"},
-    {"id": "lci-brb-31", "tipo": "LCI", "emissor": "BRB Banco de Brasília", "plataforma": "Genial", "idx": "cdi", "taxa": 106.5, "venc": "2031-11-08", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-09"},
+    {"id": "lci-brb-28", "tipo": "LCI", "emissor": "BRB Banco de Brasília", "plataforma": "Genial", "idx": "cdi", "taxa": 103.5, "venc": "2028-10-29", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-09", "obs": "Crédito fraco: S&P brCCC+ (jun/2026), sem balanço publicado desde jun/2025. FGC cobre, mas o resgate pode atrasar"},
+    {"id": "lci-brb-31", "tipo": "LCI", "emissor": "BRB Banco de Brasília", "plataforma": "Genial", "idx": "cdi", "taxa": 106.5, "venc": "2031-11-08", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-09", "obs": "Crédito fraco: S&P brCCC+ (jun/2026), sem balanço publicado desde jun/2025. FGC cobre, mas o resgate pode atrasar"},
     {"id": "lci-btg-33", "tipo": "LCI", "emissor": "BTG Pactual", "plataforma": "BTG Pactual", "idx": "pre", "taxa": 13.02, "venc": "2033-11-05", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-05"},
     {"id": "lca-original-28", "tipo": "LCA", "emissor": "Banco Original (PicPay)", "plataforma": "Rico", "idx": "pre", "taxa": 13.04, "venc": "2028-11-09", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-09"},
     {"id": "lca-original-29", "tipo": "LCA", "emissor": "Banco Original (PicPay)", "plataforma": "Rico", "idx": "pre", "taxa": 13.39, "venc": "2029-11-08", "ir": "isento", "gar": "FGC", "fonte": "Meelion", "data": "2026-11-09"},
