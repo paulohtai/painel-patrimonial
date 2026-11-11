@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-11-10T23:08-03:00",
+  "atualizadoEm": "2026-11-11T15:50-03:00",
   "fonte": "Banco Central (SGS e Focus) e Tesouro Transparente",
   "selic": 13.75,
   "cdi": 13.65,
@@ -46,49 +46,49 @@
     "tselic": {
       "taxa": 0.11,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "pre32": {
-      "taxa": 15.08,
+      "taxa": 15.06,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "pre29": {
-      "taxa": 14.71,
+      "taxa": 14.59,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "ipca40": {
-      "taxa": 7.45,
+      "taxa": 7.43,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "ipca32": {
-      "taxa": 7.75,
+      "taxa": 7.71,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "ipca37s": {
-      "taxa": 7.65,
+      "taxa": 7.61,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "ipca45s": {
-      "taxa": 7.46,
+      "taxa": 7.45,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     },
     "pre37s": {
-      "taxa": 15.0,
+      "taxa": 15.01,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-09"
+      "data": "2026-11-10"
     }
   },
   "status": {
     "selic": "ok",
     "cdi": "ok",
     "ipca": "ok",
-    "tr": "ok",
+    "tr": "falhou: HTTPError",
     "focus": "ok",
     "tesouro": "ok"
   }
