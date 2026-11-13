@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-11-12T16:03-03:00",
+  "atualizadoEm": "2026-11-12T23:51-03:00",
   "fonte": "Banco Central (SGS e Focus) e Tesouro Transparente",
   "selic": 13.75,
   "cdi": 13.65,
@@ -88,7 +88,7 @@
     "selic": "ok",
     "cdi": "ok",
     "ipca": "ok",
-    "tr": "falhou: HTTPError",
+    "tr": "ok",
     "focus": "ok",
     "tesouro": "ok"
   }
