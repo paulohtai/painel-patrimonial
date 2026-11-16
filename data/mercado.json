@@ -1,14 +1,14 @@
 {
-  "atualizadoEm": "2026-11-13T23:38-03:00",
+  "atualizadoEm": "2026-11-16T18:11-03:00",
   "fonte": "Banco Central (SGS e Focus) e Tesouro Transparente",
   "selic": 13.75,
   "cdi": 13.65,
   "ipca12m": 4.63,
   "ipcaRef": "out/26",
-  "focusIpca": 5.22,
+  "focusIpca": 5.11,
   "focusSelic": 13.75,
   "focusAno": 2026,
-  "tr": 0.1691,
+  "tr": 0.1456,
   "proxCopom": "09/12",
   "ata": "10/11",
   "notasRef": "novembro de 2026",
@@ -46,46 +46,46 @@
     "tselic": {
       "taxa": 0.11,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
+      "data": "2026-11-13"
     },
     "pre32": {
-      "taxa": 15.13,
+      "taxa": 15.32,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
+      "data": "2026-11-13"
     },
     "pre29": {
-      "taxa": 14.65,
+      "taxa": 14.85,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
+      "data": "2026-11-13"
     },
     "ipca40": {
-      "taxa": 7.46,
-      "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
-    },
-    "ipca32": {
-      "taxa": 7.67,
-      "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
-    },
-    "ipca37s": {
-      "taxa": 7.63,
-      "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
-    },
-    "ipca45s": {
       "taxa": 7.49,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
+      "data": "2026-11-13"
+    },
+    "ipca32": {
+      "taxa": 7.73,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-11-13"
+    },
+    "ipca37s": {
+      "taxa": 7.67,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-11-13"
+    },
+    "ipca45s": {
+      "taxa": 7.53,
+      "fonte": "Tesouro Transparente",
+      "data": "2026-11-13"
     },
     "pre37s": {
-      "taxa": 15.09,
+      "taxa": 15.3,
       "fonte": "Tesouro Transparente",
-      "data": "2026-11-12"
+      "data": "2026-11-13"
     }
   },
   "status": {
-    "selic": "ok",
+    "selic": "falhou: HTTPError",
     "cdi": "ok",
     "ipca": "ok",
     "tr": "ok",
