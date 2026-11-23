@@ -1,11 +1,11 @@
 {
-  "atualizadoEm": "2026-11-21T00:24-03:00",
+  "atualizadoEm": "2026-11-23T19:52-03:00",
   "fonte": "Banco Central (SGS e Focus) e Tesouro Transparente",
   "selic": 13.75,
   "cdi": 13.65,
   "ipca12m": 4.63,
   "ipcaRef": "out/26",
-  "focusIpca": 5.11,
+  "focusIpca": 5.15,
   "focusSelic": 13.75,
   "focusAno": 2026,
   "tr": 0.1693,
@@ -86,9 +86,9 @@
   },
   "status": {
     "selic": "ok",
-    "cdi": "falhou: HTTPError",
+    "cdi": "ok",
     "ipca": "ok",
-    "tr": "ok",
+    "tr": "falhou: HTTPError",
     "focus": "ok",
     "tesouro": "ok"
   }
